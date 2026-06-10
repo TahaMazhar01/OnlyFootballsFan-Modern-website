@@ -3,25 +3,126 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0b1120;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-bold tracking-tight text-ink;
+  }
+  ::selection {
+    background: #16e07a;
+    color: #04130a;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-display
+      font-semibold transition-all duration-200 focus-visible:outline-none
+      focus-visible:ring-4 focus-visible:ring-accent/40 disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-accent-gradient px-6 py-3 text-base text-navy shadow-glow
+      hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-surface px-6 py-3 text-base text-ink
+      hover:border-accent hover:text-accent-dark hover:-translate-y-0.5;
+  }
+  .btn-navy {
+    @apply btn bg-navy px-6 py-3 text-base text-white hover:bg-navy-light
+      hover:-translate-y-0.5;
+  }
+
+  .card {
+    @apply rounded-3xl border border-line bg-surface shadow-soft;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm
+      font-semibold;
+  }
+
+  .live-dot {
+    @apply h-2.5 w-2.5 rounded-full bg-live animate-pulse-live;
+  }
+
+  /* Solid-ish instead of backdrop-blur — backdrop-filter repaints on every
+     scroll frame, which causes jank. */
+  .glass {
+    @apply bg-white/90;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* lightweight CSS "aurora" — drifting blurred blobs, GPU-composited (no JS) */
+@keyframes auroraA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, 4%, 0) scale(1.15);
+  }
+}
+@keyframes auroraB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-5%, -4%, 0) scale(1);
+  }
+}
+
+/* slow cinematic zoom for full-bleed background images */
+@keyframes kenburns {
+  from {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.18) translate3d(-1.5%, -1%, 0);
+  }
+}
+.kenburns {
+  animation: kenburns 18s ease-in-out infinite alternate;
+}
+
+/* Skip rendering/layout of off-screen sections to keep scrolling smooth. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -1,101 +1,145 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { getMatches, getBlogs, getNews } from "@/lib/data";
+import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
+import { useLiveData } from "@/hooks/useLiveData";
+import { Hero } from "@/components/home/Hero";
+import { LiveStrip } from "@/components/match/LiveStrip";
+import { LogoMarquee } from "@/components/home/LogoMarquee";
+import { Stats } from "@/components/home/Stats";
+import { Newsletter } from "@/components/home/Newsletter";
+import { FanPowerRankings } from "@/components/home/FanPowerRankings";
+import { MatchCard } from "@/components/match/MatchCard";
+import { BlogCard } from "@/components/blog/BlogCard";
+import { NewsCard } from "@/components/news/NewsCard";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
+
+export default function HomePage() {
+  const matches = useLiveData(
+    async () => {
+      const all = await getMatches();
+      return [
+        ...all.filter((m) => m.status === "live"),
+        ...all.filter((m) => m.status === "upcoming"),
+      ].slice(0, 4);
+    },
+    [] as Match[],
+    [],
+  );
+  const blogs = useLiveData(async () => (await getBlogs()).slice(0, 3), [] as BlogPost[], []);
+  const news = useLiveData(async () => (await getNews(4)), [] as NewsItem[], []);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      <Hero />
+      <LiveStrip />
+      <LogoMarquee />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Today's matches + live polls */}
+      <section className="cv-auto container-page py-16">
+        <SectionHeading
+          eyebrow="Matchday"
+          title="Today's matches: cast your vote"
+          subtitle="Live and upcoming fixtures with real-time fan polls. Tap your team and watch the bars move."
+          action={
+            <Link href="/matches" className="btn-ghost">
+              All matches <ArrowRight className="h-5 w-5" />
+            </Link>
+          }
+        />
+        <StaggerReveal className="mt-10 grid gap-6 md:grid-cols-2">
+          {matches.map((m) => (
+            <MatchCard key={m.id} match={m} />
+          ))}
+        </StaggerReveal>
+      </section>
+
+      {/* Latest news — feed of breaking stories, transfers & match reports */}
+      <section className="cv-auto container-page py-16">
+        <SectionHeading
+          eyebrow="News"
+          title="The latest from football"
+          subtitle="Breaking stories, transfers and match reports, fresh from the grounds."
+          action={
+            <Link href="/news" className="btn-ghost">
+              All news <ArrowRight className="h-5 w-5" />
+            </Link>
+          }
+        />
+        {news.length > 0 && (
+          <div className="mt-10 space-y-6">
+            <Reveal>
+              <NewsCard item={news[0]} featured />
+            </Reveal>
+            <StaggerReveal className="grid gap-6 sm:grid-cols-3">
+              {news.slice(1, 4).map((n) => (
+                <NewsCard key={n.id} item={n} />
+              ))}
+            </StaggerReveal>
+          </div>
+        )}
+      </section>
+
+      <Stats />
+
+      {/* Fan Power Rankings — live leaderboard of clubs by total fan votes */}
+      <section className="cv-auto container-page py-16">
+        <SectionHeading
+          eyebrow="Fan pulse"
+          title="Who the fans are backing"
+          subtitle="Every vote across every poll, added up live. Watch your club climb the rankings in real time."
+          action={
+            <Link href="/matches" className="btn-ghost">
+              Cast your vote <ArrowRight className="h-5 w-5" />
+            </Link>
+          }
+        />
+        <Reveal className="mt-10">
+          <FanPowerRankings />
+        </Reveal>
+      </section>
+
+      {/* Latest blogs */}
+      <section className="cv-auto container-page py-16">
+        <SectionHeading
+          eyebrow="Fresh content"
+          title="Latest from the blog"
+          subtitle="Analysis, features and fan stories, updated daily."
+          action={
+            <Link href="/blog" className="btn-ghost">
+              All stories <ArrowRight className="h-5 w-5" />
+            </Link>
+          }
+        />
+        <StaggerReveal className="mt-10 grid gap-6 md:grid-cols-3">
+          {blogs.map((b) => (
+            <BlogCard key={b.id} post={b} />
+          ))}
+        </StaggerReveal>
+      </section>
+
+      <Newsletter />
+
+      {/* CTA band */}
+      <Reveal className="container-page pb-24">
+        <div className="flex flex-col items-center justify-between gap-6 overflow-hidden rounded-4xl bg-accent-gradient p-10 text-center shadow-glow sm:flex-row sm:text-left">
+          <div>
+            <h2 className="text-3xl text-navy sm:text-4xl">
+              Your team needs your voice
+            </h2>
+            <p className="mt-2 max-w-xl text-lg text-navy/80">
+              Jump into a live match and cast your vote — every tap moves the
+              bars and backs your side in real time.
+            </p>
+          </div>
+          <Link href="/matches" className="btn-navy shrink-0 text-lg">
+            Vote on live matches <ArrowRight className="h-5 w-5" />
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </Reveal>
+    </>
   );
 }
