@@ -366,5 +366,22 @@ export function startLiveVoteSimulation(intervalMs = 3500): () => void {
   return () => window.clearInterval(timer);
 }
 
+/**
+ * Dedicated live-scores heartbeat. Independent of the poll simulation, it fires
+ * the store's notify() on an interval so every getScores() consumer re-fetches
+ * the /api/fixtures proxy (server-cached ~30s). This guarantees live scores keep
+ * updating during a match even when no polls are open. Pauses while the tab is
+ * hidden to save bandwidth.
+ */
+export function startScoresRefresh(intervalMs = 25000): () => void {
+  if (typeof window === "undefined") return () => {};
+  const tick = () => {
+    if (document.hidden) return;
+    notify();
+  };
+  const timer = window.setInterval(tick, intervalMs);
+  return () => window.clearInterval(timer);
+}
+
 export { subscribe };
 export * from "./types";

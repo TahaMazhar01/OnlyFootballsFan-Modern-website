@@ -7,18 +7,21 @@ export function StatusBadge({
   status: MatchStatus;
   minute?: number;
 }) {
+  // These sit on dark match banners, so use light/solid fills for contrast.
   if (status === "live") {
     return (
-      <span className="chip bg-live/10 text-live ring-1 ring-live/30">
-        <span className="live-dot" />
+      <span className="chip bg-live text-white shadow-soft">
+        <span className="h-2 w-2 rounded-full bg-white animate-pulse-live" />
         LIVE {minute ? `${minute}'` : ""}
       </span>
     );
   }
   if (status === "upcoming") {
     return (
-      <span className="chip bg-navy/10 text-navy">Upcoming</span>
+      <span className="chip bg-accent text-navy shadow-soft">Upcoming</span>
     );
   }
-  return <span className="chip bg-line text-muted">Full time</span>;
+  return (
+    <span className="chip bg-white/90 text-navy shadow-soft">Full time</span>
+  );
 }
