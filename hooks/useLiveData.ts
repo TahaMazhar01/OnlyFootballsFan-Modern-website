@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { subscribe } from "@/lib/data";
 
 /**
  * Fetches data from the data layer and re-fetches whenever the store changes
- * (votes, admin edits, the realtime simulation). This is what makes the live
- * poll bars feel real-time in the prototype.
+ * (votes, admin edits, the realtime simulation / scores heartbeat).
  *
- * `fetcher` is included in deps so the hook never runs with a stale fetcher.
+ * The fetcher is held in a ref so we always call the LATEST one (no stale
+ * closure) WITHOUT re-running the effect on every render — re-running would
+ * cancel slower in-flight fetches (e.g. the live-scores API) before they commit,
+ * leaving those sections empty. The effect only re-runs when `deps` change.
  */
 export function useLiveData<T>(
   fetcher: () => Promise<T>,
@@ -16,12 +18,15 @@ export function useLiveData<T>(
   deps: ReadonlyArray<unknown> = [],
 ): T {
   const [data, setData] = useState<T>(initial);
+  const fetcherRef = useRef(fetcher);
+  fetcherRef.current = fetcher;
 
   useEffect(() => {
     let active = true;
 
     const run = () => {
-      fetcher()
+      fetcherRef
+        .current()
         .then((d) => {
           if (active) setData(d);
         })
@@ -35,8 +40,8 @@ export function useLiveData<T>(
       active = false;
       unsub();
     };
-  }, [fetcher, subscribe, ...deps]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 
   return data;
 }
-

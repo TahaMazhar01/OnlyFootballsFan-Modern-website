@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getScores, getBlogs, getNews } from "@/lib/data";
+import { getScores, getMatches, getBlogs, getNews } from "@/lib/data";
 import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { Hero } from "@/components/home/Hero";
@@ -21,12 +21,19 @@ import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
 export default function HomePage() {
   const clubMatches = useLiveData(
     async () => {
-      const { matches: all } = await getScores();
-      return all.filter((m) =>
+      const isClub = (m: Match) =>
         !m.competition.toLowerCase().includes("fifa") &&
         !m.competition.toLowerCase().includes("world cup") &&
-        (m.status === "live" || m.status === "upcoming")
-      ).slice(0, 4);
+        (m.status === "live" || m.status === "upcoming");
+      const { matches: all } = await getScores();
+      let club = all.filter(isClub);
+      // The live API only carries World Cup fixtures during the tournament, so
+      // fall back to our league fixtures (PL / LaLiga / UCL …) — never empty.
+      if (club.length === 0) {
+        const store = await getMatches();
+        club = store.filter(isClub);
+      }
+      return club.slice(0, 4);
     },
     [] as Match[],
     [],
