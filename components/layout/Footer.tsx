@@ -33,16 +33,16 @@ export function Footer() {
         <FooterCol
           title="Explore"
           links={[
-            ["Matches", "/matches"],
+            ["Live Scores", "/matches"],
+            ["Fan Polls", "/polls"],
             ["News", "/news"],
             ["Blog", "/blog"],
-            ["About", "/about"],
           ]}
         />
         <FooterCol
           title="Community"
           links={[
-            ["Live Polls", "/matches"],
+            ["Fan Polls", "/polls"],
             ["Latest News", "/news"],
             ["Fan Stories", "/blog"],
             ["Our Story", "/about"],

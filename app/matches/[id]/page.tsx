@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, CalendarClock, MapPin, Trophy } from "lucide-react";
-import { getMatch, getNews } from "@/lib/data";
-import type { Match, NewsItem } from "@/lib/data/types";
+import { getMatch, getScores, getPoll, getNews } from "@/lib/data";
+import type { Match, NewsItem, Poll } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { StatusBadge } from "@/components/match/StatusBadge";
@@ -16,7 +16,17 @@ import { kickoffLabel } from "@/lib/format";
 export default function MatchDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const match = useLiveData(() => getMatch(id), undefined, [id]);
+  // Resolve from live scores first (real fixtures), then the local store.
+  const match = useLiveData(
+    async () => {
+      const { matches } = await getScores();
+      return matches.find((m) => m.id === id) ?? (await getMatch(id));
+    },
+    undefined,
+    [id],
+  );
+  // A poll only exists for our own (store) matches, not live-API fixtures.
+  const poll = useLiveData<Poll | undefined>(() => getPoll(id), undefined, [id]);
   const news = useLiveData(async () => (await getNews(3)), [] as NewsItem[], []);
 
   if (match === undefined) {
@@ -95,10 +105,29 @@ export default function MatchDetailPage() {
       {/* Body */}
       <section className="container-page grid gap-8 py-12 lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-8">
-          <div className="card p-6">
-            <h2 className="mb-4 text-2xl">Live fan poll</h2>
-            <LivePoll match={match} size="lg" />
-          </div>
+          {poll ? (
+            <div className="card p-6">
+              <h2 className="mb-4 text-2xl">Fan poll</h2>
+              <LivePoll match={match} size="lg" />
+              <p className="mt-3 text-sm text-muted">
+                Voting closes 24 hours before kickoff.{" "}
+                <Link href="/polls" className="font-semibold text-accent-dark">
+                  See all polls →
+                </Link>
+              </p>
+            </div>
+          ) : (
+            <div className="card p-6">
+              <h2 className="mb-2 text-2xl">Want to predict this one?</h2>
+              <p className="text-lg text-muted">
+                Head to{" "}
+                <Link href="/polls" className="font-semibold text-accent-dark">
+                  Fan Polls
+                </Link>{" "}
+                to back your team before kickoff.
+              </p>
+            </div>
+          )}
 
           <div>
             <h2 className="mb-4 text-2xl">Fan support</h2>

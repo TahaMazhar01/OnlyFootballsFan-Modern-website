@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getMatches, getBlogs, getNews } from "@/lib/data";
+import { getScores, getBlogs, getNews } from "@/lib/data";
 import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { Hero } from "@/components/home/Hero";
@@ -20,7 +20,7 @@ import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
 export default function HomePage() {
   const matches = useLiveData(
     async () => {
-      const all = await getMatches();
+      const { matches: all } = await getScores();
       return [
         ...all.filter((m) => m.status === "live"),
         ...all.filter((m) => m.status === "upcoming"),
@@ -42,11 +42,11 @@ export default function HomePage() {
       <section className="cv-auto container-page py-16">
         <SectionHeading
           eyebrow="Matchday"
-          title="Today's matches: cast your vote"
-          subtitle="Live and upcoming fixtures with real-time fan polls. Tap your team and watch the bars move."
+          title="Live &amp; upcoming scores"
+          subtitle="Real-time scores and the fixtures on their way. Tap a match for the full detail."
           action={
             <Link href="/matches" className="btn-ghost">
-              All matches <ArrowRight className="h-5 w-5" />
+              All scores <ArrowRight className="h-5 w-5" />
             </Link>
           }
         />
@@ -92,7 +92,7 @@ export default function HomePage() {
           title="Who the fans are backing"
           subtitle="Every vote across every poll, added up live. Watch your club climb the rankings in real time."
           action={
-            <Link href="/matches" className="btn-ghost">
+            <Link href="/polls" className="btn-ghost">
               Cast your vote <ArrowRight className="h-5 w-5" />
             </Link>
           }
@@ -135,8 +135,8 @@ export default function HomePage() {
               bars and backs your side in real time.
             </p>
           </div>
-          <Link href="/matches" className="btn-navy shrink-0 text-lg">
-            Vote on live matches <ArrowRight className="h-5 w-5" />
+          <Link href="/polls" className="btn-navy shrink-0 text-lg">
+            Cast your vote <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
       </Reveal>

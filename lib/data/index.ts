@@ -49,16 +49,61 @@ export async function getMatch(id: string): Promise<Match | undefined> {
   return getDB().matches.find((m) => m.id === id);
 }
 
+/**
+ * Live scores for the Scores page. Tries the server proxy at /api/fixtures
+ * (real data when FOOTBALL_DATA_TOKEN is configured); otherwise falls back to
+ * the local mock fixtures so the site always renders. The `live` flag lets the
+ * UI show whether it's showing real or demo data.
+ */
+export async function getScores(
+  status?: MatchStatus,
+): Promise<{ matches: Match[]; live: boolean }> {
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/fixtures", { cache: "no-store" });
+      if (res.ok) {
+        const data = (await res.json()) as { live?: boolean; matches?: Match[] };
+        if (data.live && Array.isArray(data.matches) && data.matches.length) {
+          const all = [...data.matches].sort(byKickoff);
+          return {
+            matches: status ? all.filter((m) => m.status === status) : all,
+            live: true,
+          };
+        }
+      }
+    } catch {
+      /* network/API error — fall back to mock below */
+    }
+  }
+  return { matches: await getMatches(status), live: false };
+}
+
 // ------------------------------ Polls -------------------------------------
+
+// Voting closes one full day before kickoff. A poll is only truly open if the
+// admin hasn't closed it AND we're more than 24h before the match starts.
+const POLL_LEAD_MS = 24 * 60 * 60 * 1000;
+
+export function isPollVotingOpen(poll: Poll, match?: Match): boolean {
+  if (!poll.isOpen) return false;
+  if (!match) return poll.isOpen;
+  return Date.now() < new Date(match.kickoff).getTime() - POLL_LEAD_MS;
+}
+
+function withEffectiveOpen(poll: Poll): Poll {
+  const match = getDB().matches.find((m) => m.id === poll.matchId);
+  return { ...poll, isOpen: isPollVotingOpen(poll, match) };
+}
 
 export async function getPoll(matchId: string): Promise<Poll | undefined> {
   await delay();
-  return getDB().polls.find((p) => p.matchId === matchId);
+  const poll = getDB().polls.find((p) => p.matchId === matchId);
+  return poll ? withEffectiveOpen(poll) : undefined;
 }
 
 export async function getPolls(): Promise<Poll[]> {
   await delay();
-  return [...getDB().polls];
+  return getDB().polls.map(withEffectiveOpen);
 }
 
 /** Record a vote for a team option and return the updated poll. */
@@ -68,11 +113,13 @@ export async function submitVote(
 ): Promise<Poll | undefined> {
   await delay(80);
   const poll = getDB().polls.find((p) => p.id === pollId);
-  if (!poll || !poll.isOpen) return poll;
+  if (!poll) return undefined;
+  const match = getDB().matches.find((m) => m.id === poll.matchId);
+  if (!isPollVotingOpen(poll, match)) return withEffectiveOpen(poll); // closed
   const opt = poll.options.find((o) => o.teamId === optionTeamId);
   if (opt) opt.votes += 1;
   notify();
-  return poll;
+  return withEffectiveOpen(poll);
 }
 
 export async function setPollOpen(

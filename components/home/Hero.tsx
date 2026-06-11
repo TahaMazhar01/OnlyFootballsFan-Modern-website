@@ -73,7 +73,7 @@ export function Hero() {
             {...up(3)}
             className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start"
           >
-            <Link href="/matches" className="btn-primary text-lg">
+            <Link href="/polls" className="btn-primary text-lg">
               <Play className="h-5 w-5" fill="currentColor" /> Vote Now
             </Link>
             <Link href="/matches" className="btn-ghost text-lg">

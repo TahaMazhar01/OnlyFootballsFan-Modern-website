@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 import {
   Home,
   Trophy,
+  Vote,
   Newspaper,
-  BookOpen,
   Info,
   Flame,
   type LucideIcon,
@@ -22,9 +22,9 @@ interface NavItem {
 
 const items: NavItem[] = [
   { name: "Home", url: "/", icon: Home },
-  { name: "Matches", url: "/matches", icon: Trophy },
+  { name: "Scores", url: "/matches", icon: Trophy },
+  { name: "Polls", url: "/polls", icon: Vote },
   { name: "News", url: "/news", icon: Newspaper },
-  { name: "Blog", url: "/blog", icon: BookOpen },
   { name: "About", url: "/about", icon: Info },
 ];
 

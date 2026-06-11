@@ -6,7 +6,6 @@ import { ArrowUpRight, MapPin } from "lucide-react";
 import type { Match } from "@/lib/data/types";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { StatusBadge } from "./StatusBadge";
-import { LivePoll } from "./LivePoll";
 import { kickoffLabel } from "@/lib/format";
 
 export function MatchCard({ match }: { match: Match }) {
@@ -59,15 +58,22 @@ export function MatchCard({ match }: { match: Match }) {
         <span className="font-semibold text-ink">{kickoffLabel(match.kickoff)}</span>
       </div>
 
-      {/* Poll */}
-      <div className="p-5 pt-3">
-        <LivePoll match={match} />
+      {/* Footer link */}
+      <div className="flex items-center justify-between px-5 pb-5 pt-3">
         <Link
           href={`/matches/${match.id}`}
-          className="mt-4 inline-flex items-center gap-1 text-[15px] font-bold text-accent-dark hover:gap-2 transition-all"
+          className="inline-flex items-center gap-1 text-[15px] font-bold text-accent-dark hover:gap-2 transition-all"
         >
           Match centre <ArrowUpRight className="h-4 w-4" />
         </Link>
+        {status === "upcoming" && (
+          <Link
+            href="/polls"
+            className="text-sm font-semibold text-muted hover:text-accent-dark"
+          >
+            Vote in poll →
+          </Link>
+        )}
       </div>
     </motion.article>
   );

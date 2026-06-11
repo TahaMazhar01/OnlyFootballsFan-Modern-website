@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { getMatches } from "@/lib/data";
+import { Radio } from "lucide-react";
+import { getScores } from "@/lib/data";
 import type { Match, MatchStatus } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { MatchCard } from "@/components/match/MatchCard";
@@ -17,9 +18,12 @@ const filters: { key: Filter; label: string }[] = [
   { key: "finished", label: "Finished" },
 ];
 
-export default function MatchesPage() {
+const EMPTY = { matches: [] as Match[], live: false };
+
+export default function ScoresPage() {
   const [filter, setFilter] = useState<Filter>("all");
-  const matches = useLiveData(() => getMatches(), [] as Match[], []);
+  const data = useLiveData(() => getScores(), EMPTY, []);
+  const { matches, live } = data;
 
   const liveCount = matches.filter((m) => m.status === "live").length;
   const shown =
@@ -28,10 +32,22 @@ export default function MatchesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Fixtures"
-        title="Every match. Every vote."
-        subtitle="Follow live and upcoming games, see results, and back your team in real-time fan polls."
+        eyebrow="Matchday Centre"
+        title="Live Scores"
+        subtitle="Real-time scores and upcoming fixtures, updated as the action happens."
       >
+        <div className="mb-5">
+          <span
+            className={`chip ring-1 ${
+              live
+                ? "bg-live/10 text-live ring-live/30"
+                : "bg-accent-soft text-accent-dark ring-accent/30"
+            }`}
+          >
+            <Radio className="h-3.5 w-3.5 animate-pulse-live" />
+            {live ? "Live data" : "Demo data — connect API for live scores"}
+          </span>
+        </div>
         <div className="flex flex-wrap gap-2">
           {filters.map((f) => (
             <button
@@ -45,7 +61,7 @@ export default function MatchesPage() {
             >
               {filter === f.key && (
                 <motion.span
-                  layoutId="match-filter"
+                  layoutId="score-filter"
                   className="absolute inset-0 -z-10 rounded-full bg-navy"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
@@ -66,7 +82,7 @@ export default function MatchesPage() {
           <div className="rounded-3xl border border-dashed border-line bg-surface p-16 text-center">
             <p className="font-display text-2xl font-bold">No matches here yet</p>
             <p className="mt-2 text-lg text-muted">
-              Try another filter — new fixtures are added daily.
+              Try another filter — new fixtures appear as they&apos;re scheduled.
             </p>
           </div>
         ) : (
