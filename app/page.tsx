@@ -6,6 +6,7 @@ import { getScores, getBlogs, getNews } from "@/lib/data";
 import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { Hero } from "@/components/home/Hero";
+import { LiveNow } from "@/components/home/LiveNow";
 import { LiveStrip } from "@/components/match/LiveStrip";
 import { LogoMarquee } from "@/components/home/LogoMarquee";
 import { Stats } from "@/components/home/Stats";
@@ -35,6 +36,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <LiveNow />
       <LiveStrip />
       <LogoMarquee />
 

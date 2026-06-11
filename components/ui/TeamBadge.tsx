@@ -21,6 +21,25 @@ export function TeamBadge({
   size?: keyof typeof sizes;
   className?: string;
 }) {
+  // Real crest from the live API (Football-Data) when available; otherwise the
+  // brand-colour initials badge so nothing ever renders broken.
+  if (team.badgeUrl) {
+    return (
+      <span
+        className={`inline-flex shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 shadow-soft ring-1 ring-line ${sizes[size]} ${className}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={team.badgeUrl}
+          alt={`${team.name} crest`}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-contain"
+        />
+      </span>
+    );
+  }
+
   const initials = team.shortName.slice(0, 3).toUpperCase();
   return (
     <span
