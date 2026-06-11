@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Play, Radio } from "lucide-react";
+import { PlayerCarousel } from "@/components/home/PlayerCarousel";
 
 // Hero design adapted from the "lionsfc" concept (angled player frame + diagonal
 // brand slab + floating badge), re-skinned to the OnlyFootballsFan theme:
@@ -117,39 +117,8 @@ export function Hero() {
             style={{ transform: "skewX(-8deg)" }}
           />
 
-          {/* angled photo frame */}
-          <div
-            className="relative h-[520px] w-full"
-            style={{
-              clipPath: "polygon(14% 0, 100% 0, 86% 100%, 0 100%)",
-              filter: "drop-shadow(0 28px 44px rgba(11,17,32,0.32))",
-            }}
-          >
-            <Image
-              src="/players/cr7-roar.jpg"
-              alt="Footballer roaring in celebration, fist clenched"
-              fill
-              priority
-              sizes="(max-width: 480px) 100vw, 440px"
-              className="object-cover"
-              style={{ objectPosition: "center 18%" }}
-            />
-          </div>
-
-          {/* floating badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.75, duration: 0.5, ease }}
-            className="absolute bottom-9 left-[-18px] z-[4] border-l-4 border-accent bg-surface px-5 py-3.5 shadow-lift"
-          >
-            <div className="font-display text-2xl font-extrabold leading-none text-accent-dark">
-              SIUUU!
-            </div>
-            <div className="mt-1 text-[10px] font-bold uppercase tracking-[2px] text-muted">
-              Join the roar
-            </div>
-          </motion.div>
+          {/* continuously cross-fading carousel of football moments (neutral) */}
+          <PlayerCarousel />
         </motion.div>
       </div>
     </section>
