@@ -30,6 +30,18 @@ export const teams: Record<string, Team> = {
   psg: { id: "psg", name: "Paris Saint-Germain", shortName: "PSG", badgeUrl: "", primaryColor: "#004170" },
   int: { id: "int", name: "Inter Milan", shortName: "INT", badgeUrl: "", primaryColor: "#0068A8" },
   juv: { id: "juv", name: "Juventus", shortName: "JUV", badgeUrl: "", primaryColor: "#111111" },
+  // ── FIFA / National teams ─────────────────────────────────────────
+  arg: { id: "arg", name: "Argentina", shortName: "ARG", badgeUrl: "", primaryColor: "#75AADB" },
+  bra: { id: "bra", name: "Brazil", shortName: "BRA", badgeUrl: "", primaryColor: "#F7E92B" },
+  fra: { id: "fra", name: "France", shortName: "FRA", badgeUrl: "", primaryColor: "#002395" },
+  ger: { id: "ger", name: "Germany", shortName: "GER", badgeUrl: "", primaryColor: "#000000" },
+  esp: { id: "esp", name: "Spain", shortName: "ESP", badgeUrl: "", primaryColor: "#C60B1E" },
+  eng: { id: "eng", name: "England", shortName: "ENG", badgeUrl: "", primaryColor: "#CF081F" },
+  por: { id: "por", name: "Portugal", shortName: "POR", badgeUrl: "", primaryColor: "#006600" },
+  ned: { id: "ned", name: "Netherlands", shortName: "NED", badgeUrl: "", primaryColor: "#FF6600" },
+  ita: { id: "ita", name: "Italy", shortName: "ITA", badgeUrl: "", primaryColor: "#008C45" },
+  uru: { id: "uru", name: "Uruguay", shortName: "URU", badgeUrl: "", primaryColor: "#0038A8" },
+  bel: { id: "bel", name: "Belgium", shortName: "BEL", badgeUrl: "", primaryColor: "#E20E0E" },
 };
 
 // Build kickoff times relative to "now" so Live / Upcoming / Finished stay realistic.
@@ -37,6 +49,63 @@ const now = Date.now();
 const hours = (h: number) => new Date(now + h * 3600_000).toISOString();
 
 export const matches: Match[] = [
+  // ── FIFA / World Cup matches ──────────────────────────────────────
+  {
+    id: "wc1",
+    homeTeam: teams.arg,
+    awayTeam: teams.fra,
+    kickoff: hours(-0.6),
+    status: "live",
+    competition: "FIFA World Cup · Final",
+    venue: "Lusail Stadium",
+    posterUrl: img("1575361204480-aadea25e6e68"),
+    score: { home: 3, away: 3 },
+    minute: 78,
+  },
+  {
+    id: "wc2",
+    homeTeam: teams.bra,
+    awayTeam: teams.ger,
+    kickoff: hours(-0.3),
+    status: "live",
+    competition: "FIFA World Cup · Quarterfinal",
+    venue: "Maracanã Stadium",
+    posterUrl: img("1459865264687-595d652de67e"),
+    score: { home: 1, away: 0 },
+    minute: 22,
+  },
+  {
+    id: "wc3",
+    homeTeam: teams.eng,
+    awayTeam: teams.esp,
+    kickoff: hours(2),
+    status: "upcoming",
+    competition: "FIFA World Cup · Semifinal",
+    venue: "Wembley Stadium",
+    posterUrl: img("1577223625816-7546f13df25d"),
+  },
+  {
+    id: "wc4",
+    homeTeam: teams.por,
+    awayTeam: teams.ned,
+    kickoff: hours(28),
+    status: "upcoming",
+    competition: "FIFA World Cup · Group Stage",
+    venue: "Estádio do Dragão",
+    posterUrl: img("1517466787929-bc90951d0974"),
+  },
+  {
+    id: "wc5",
+    homeTeam: teams.ita,
+    awayTeam: teams.bel,
+    kickoff: hours(-20),
+    status: "finished",
+    competition: "FIFA World Cup · Round of 16",
+    venue: "Stadio Olimpico",
+    posterUrl: img("1560272564-c83b4b0c1c5d"),
+    score: { home: 2, away: 1 },
+  },
+  // ── Club matches ──────────────────────────────────────────────────
   {
     id: "m1",
     homeTeam: teams.mci,
@@ -124,6 +193,11 @@ export const polls: Poll[] = matches.map((m, i) => {
     [5800, 2100],
     [2980, 3340],
     [1900, 4600],
+    [2300, 4100],
+    [5200, 3200],
+    [3900, 2800],
+    [4500, 3900],
+    [3100, 4700],
   ][i] ?? [3000, 3000];
   return {
     id: `p${i + 1}`,

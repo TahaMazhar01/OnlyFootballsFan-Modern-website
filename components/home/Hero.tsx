@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Play, Radio } from "lucide-react";
+import { Play, Radio, Trophy, TrendingUp } from "lucide-react";
 import { PlayerCarousel } from "@/components/home/PlayerCarousel";
-
-// Hero design adapted from the "lionsfc" concept (angled player frame + diagonal
-// brand slab + floating badge), re-skinned to the OnlyFootballsFan theme:
-// green accent + navy slab + Sora display type.
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const up = (i: number) => ({
@@ -16,56 +12,54 @@ const up = (i: number) => ({
   transition: { delay: 0.08 * i, duration: 0.6, ease },
 });
 
-const stats: [string, string][] = [
-  ["2.4M+", "Votes Cast"],
-  ["350+", "Matches Covered"],
-  ["24/7", "Football News"],
+const stats: [string, string, React.ReactNode][] = [
+  ["2.4M+", "Votes Cast", <TrendingUp key="v" className="h-4 w-4 text-accent" />],
+  ["350+", "Matches Covered", <Trophy key="m" className="h-4 w-4 text-accent" />],
+  ["24/7", "Football News", <Radio key="n" className="h-4 w-4 text-accent" />],
 ];
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      {/* diagonal navy slab behind the player (desktop) */}
-      <div
-        aria-hidden
-        className="absolute right-0 top-0 hidden h-full w-[46%] lg:block"
-        style={{
-          background: "linear-gradient(160deg, #0A2540 0%, #06182c 100%)",
-          clipPath: "polygon(58% 0, 100% 0, 100% 100%, 22% 100%)",
-        }}
-      />
+      {/* Full-bleed background gradient */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-navy via-[#0b1f3a] to-navy" />
 
+      {/* Animated accent orbs */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-accent/8 blur-[100px]" />
+      </div>
 
-      <div className="container-page relative z-10 grid items-center gap-12 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
-        {/* ---- left copy ---- */}
+      <div className="container-page relative z-10 grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+        {/* ── Left: Hero copy ── */}
         <div className="text-center lg:text-left">
-          <motion.p
-            {...up(0)}
-            className="mb-5 font-display text-xs font-bold uppercase tracking-[0.25em] text-accent-dark"
-          >
-            <span className="text-muted">/</span> For the fans, by the fans{" "}
-            <span className="text-muted">/</span>
-          </motion.p>
+          {/* Live indicator badge */}
+          <motion.div {...up(0)} className="mb-6 flex justify-center lg:justify-start">
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-accent">
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse-live" />
+              Live matches now
+            </span>
+          </motion.div>
 
           <motion.h1
             {...up(1)}
-            className="font-display text-5xl font-extrabold uppercase leading-[1.04] tracking-tight sm:text-6xl lg:text-[5rem]"
+            className="font-display text-5xl font-extrabold uppercase leading-[1.04] tracking-tight text-white sm:text-6xl lg:text-[5.5rem]"
           >
             Your Game.
             <br />
             Your Voice.
             <br />
-            <span className="bg-accent-gradient bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">
               Your Home.
             </span>
           </motion.h1>
 
           <motion.p
             {...up(2)}
-            className="mx-auto mt-6 max-w-xl text-lg text-muted lg:mx-0"
+            className="mx-auto mt-6 max-w-xl text-lg text-white/60 lg:mx-0"
           >
-            Vote in daily fan polls, follow live match scores as they happen, and
-            never miss a headline. Football&apos;s biggest community is waiting
+            Vote in daily fan polls, follow live FIFA World Cup scores as they happen,
+            and never miss a headline. Football&apos;s biggest community is waiting
             for you.
           </motion.p>
 
@@ -73,39 +67,45 @@ export function Hero() {
             {...up(3)}
             className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start"
           >
-            <Link href="/polls" className="btn-primary text-lg">
+            <Link href="/polls" className="group inline-flex items-center gap-2 rounded-full bg-accent-gradient px-8 py-3.5 font-display text-lg font-bold text-navy shadow-glow transition-all hover:-translate-y-0.5 hover:shadow-lift">
               <Play className="h-5 w-5" fill="currentColor" /> Vote Now
             </Link>
-            <Link href="/matches" className="btn-ghost text-lg">
+            <Link href="/matches" className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-3.5 font-display text-lg font-bold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-white/10">
               <Radio className="h-5 w-5" /> Live Scores
             </Link>
           </motion.div>
 
+          {/* Stats row */}
           <motion.div
             {...up(4)}
-            className="mt-10 flex justify-center gap-10 lg:justify-start"
+            className="mt-12 flex justify-center gap-8 lg:justify-start"
           >
-            {stats.map(([num, label]) => (
-              <div key={label}>
-                <p className="font-display text-3xl font-extrabold text-accent-dark">
-                  {num}
-                </p>
-                <p className="mt-1 text-[10px] font-bold uppercase tracking-[2px] text-muted">
-                  {label}
-                </p>
+            {stats.map(([num, label, icon]) => (
+              <div key={label} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+                  {icon}
+                </div>
+                <div>
+                  <p className="font-display text-2xl font-extrabold text-white">
+                    {num}
+                  </p>
+                  <p className="text-[10px] font-bold uppercase tracking-[2px] text-white/50">
+                    {label}
+                  </p>
+                </div>
               </div>
             ))}
           </motion.div>
         </div>
 
-        {/* ---- player visual ---- */}
+        {/* ── Right: Player carousel ── */}
         <motion.div
           initial={{ opacity: 0, x: 40, scale: 0.95 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.8, ease }}
           className="relative mx-auto w-full max-w-[440px] lg:justify-self-end"
         >
-          {/* skewed accent bars */}
+          {/* Accent bars */}
           <span
             aria-hidden
             className="absolute -left-5 -top-6 bottom-[-24px] z-[3] w-[5px] bg-white"
@@ -117,7 +117,7 @@ export function Hero() {
             style={{ transform: "skewX(-8deg)" }}
           />
 
-          {/* continuously cross-fading carousel of football moments (neutral) */}
+          {/* Cross-fading carousel of football moments */}
           <PlayerCarousel />
         </motion.div>
       </div>

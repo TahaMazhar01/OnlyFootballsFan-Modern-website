@@ -32,7 +32,15 @@ export function MatchCard({ match }: { match: Match }) {
         ) : (
           <div className="h-full w-full bg-navy" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-navy/85 via-navy/30 to-transparent" />
+        {/* team-coloured diagonal tint (home → away) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(125deg, ${homeTeam.primaryColor}66 0%, transparent 42%, ${awayTeam.primaryColor}66 100%)`,
+          }}
+        />
+        {/* cinematic navy grade so badges + score pop */}
+        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/55 to-navy/10" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
           <span className="chip bg-white/90 text-navy">{match.competition}</span>
           <StatusBadge status={status} minute={match.minute} />

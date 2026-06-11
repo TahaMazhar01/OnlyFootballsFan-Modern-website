@@ -37,3 +37,7 @@ next-env.d.ts
 
 # local tooling
 /.claude/
+
+# stray logs
+server-log.txt
+*.log

@@ -4,25 +4,21 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-const u = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=72`;
-
-// A neutral rotation of world-class football moments (no single player/club
-// favoured). Swap any entry — or drop your own photos into /public/players and
-// point `src` at them, e.g. src: "/players/messi.jpg".
+// Provided football images (downloaded to /public/players). Swap any entry or
+// drop a new photo into that folder and point `src` at it.
 const slides: { src: string; caption: string }[] = [
-  { src: "/players/cr7-roar.jpg", caption: "THE ROAR" },
-  { src: u("1543326727-cf6c39e8f84c"), caption: "MATCHDAY" },
-  { src: u("1551958219-acbc608c6377"), caption: "FULL FOCUS" },
-  { src: u("1577223625816-7546f13df25d"), caption: "GOAL!" },
-  { src: u("1518091043644-c1d4457512c6"), caption: "KICKOFF" },
-  { src: u("1571019613454-1cb2f99b2d8b"), caption: "DERBY DAY" },
+  { src: "/players/p1.jpg", caption: "THE ROAR" },
+  { src: "/players/p2.jpg", caption: "MATCHDAY" },
+  { src: "/players/p3.webp", caption: "GOAL!" },
+  { src: "/players/p4.jpg", caption: "THE STAGE" },
+  { src: "/players/p5.jpg", caption: "FULL TIME" },
+  { src: "/players/p6.jpg", caption: "KICKOFF" },
 ];
 
 /**
- * Continuously cross-fading hero image carousel. All slides are stacked and we
- * just animate opacity on the active index — no AnimatePresence, so it can
- * never get "stuck", and scrolling stays smooth.
+ * Cinematic, continuously cross-fading hero carousel. Slides are stacked and we
+ * animate opacity + a slow Ken Burns zoom on the active one (no AnimatePresence,
+ * so it can never get "stuck" and scrolling stays smooth).
  */
 export function PlayerCarousel() {
   const [i, setI] = useState(0);
@@ -30,40 +26,65 @@ export function PlayerCarousel() {
   useEffect(() => {
     const t = window.setInterval(
       () => setI((p) => (p + 1) % slides.length),
-      3800,
+      4200,
     );
     return () => window.clearInterval(t);
   }, []);
 
   return (
     <>
-      {/* angled frame with cross-fading slides */}
+      {/* angled frame with cross-fading + slow-zoom slides */}
       <div
-        className="relative h-[520px] w-full"
+        className="relative h-[520px] w-full overflow-hidden"
         style={{
           clipPath: "polygon(14% 0, 100% 0, 86% 100%, 0 100%)",
-          filter: "drop-shadow(0 28px 44px rgba(11,17,32,0.32))",
+          filter: "drop-shadow(0 28px 44px rgba(11,17,32,0.45))",
         }}
       >
-        {slides.map((s, idx) => (
-          <motion.div
-            key={s.src}
-            className="absolute inset-0"
-            initial={false}
-            animate={{ opacity: idx === i ? 1 : 0 }}
-            transition={{ duration: 1.1, ease: "easeInOut" }}
-          >
-            <Image
-              src={s.src}
-              alt="World-class football action"
-              fill
-              priority={idx === 0}
-              sizes="(max-width: 480px) 100vw, 440px"
-              className="object-cover"
-              style={{ objectPosition: "center 18%" }}
-            />
-          </motion.div>
-        ))}
+        {slides.map((s, idx) => {
+          const active = idx === i;
+          return (
+            <motion.div
+              key={s.src}
+              className="absolute inset-0"
+              initial={false}
+              animate={{ opacity: active ? 1 : 0, scale: active ? 1.12 : 1 }}
+              transition={{
+                opacity: { duration: 1.2, ease: "easeInOut" },
+                scale: { duration: 5.2, ease: "linear" },
+              }}
+            >
+              <Image
+                src={s.src}
+                alt="World-class football moment"
+                fill
+                priority={idx === 0}
+                sizes="(max-width: 480px) 100vw, 460px"
+                className="object-cover"
+                style={{ objectPosition: "center 25%" }}
+              />
+            </motion.div>
+          );
+        })}
+
+        {/* cinematic film overlay: dark grade at the bottom + top vignette */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(8,18,33,0.72) 0%, rgba(8,18,33,0.12) 38%, rgba(8,18,33,0) 60%), radial-gradient(120% 80% at 50% 0%, rgba(8,18,33,0.35), transparent 55%)",
+          }}
+        />
+        {/* subtle diagonal sheen */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-20 mix-blend-overlay"
+          style={{
+            background:
+              "linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)",
+          }}
+        />
 
         {/* progress dots */}
         <div className="absolute bottom-4 right-6 z-10 flex gap-1.5">
@@ -78,7 +99,7 @@ export function PlayerCarousel() {
         </div>
       </div>
 
-      {/* floating badge with rotating neutral caption */}
+      {/* floating badge with rotating caption */}
       <div className="absolute bottom-9 left-[-18px] z-[4] border-l-4 border-accent bg-surface px-5 py-3.5 shadow-lift">
         <motion.div
           key={slides[i].caption}

@@ -6,7 +6,7 @@ import { getScores, getBlogs, getNews } from "@/lib/data";
 import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { Hero } from "@/components/home/Hero";
-import { LiveNow } from "@/components/home/LiveNow";
+import { FifaMatches } from "@/components/home/FifaMatches";
 import { LiveStrip } from "@/components/match/LiveStrip";
 import { LogoMarquee } from "@/components/home/LogoMarquee";
 import { Stats } from "@/components/home/Stats";
@@ -19,7 +19,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
 
 export default function HomePage() {
-  const matches = useLiveData(
+  const allMatches = useLiveData(
     async () => {
       const { matches: all } = await getScores();
       return [
@@ -33,19 +33,26 @@ export default function HomePage() {
   const blogs = useLiveData(async () => (await getBlogs()).slice(0, 3), [] as BlogPost[], []);
   const news = useLiveData(async () => (await getNews(4)), [] as NewsItem[], []);
 
+  // Separate FIFA matches for the specialised section
+  const clubMatches = allMatches.filter(
+    (m) => !m.competition.toLowerCase().includes("fifa") &&
+           !m.competition.toLowerCase().includes("world cup")
+  );
+
   return (
     <>
       <Hero />
-      <LiveNow />
       <LiveStrip />
-      <LogoMarquee />
 
-      {/* Today's matches + live polls */}
+      {/* ── FIFA World Cup matches (hero-level prominence) ── */}
+      <FifaMatches />
+
+      {/* ── Club matches + live polls ── */}
       <section className="cv-auto container-page py-16">
         <SectionHeading
-          eyebrow="Matchday"
-          title="Live &amp; upcoming scores"
-          subtitle="Real-time scores and the fixtures on their way. Tap a match for the full detail."
+          eyebrow="Club football"
+          title="Live & upcoming scores"
+          subtitle="Real-time scores and the fixtures on their way from the top leagues."
           action={
             <Link href="/matches" className="btn-ghost">
               All scores <ArrowRight className="h-5 w-5" />
@@ -53,46 +60,50 @@ export default function HomePage() {
           }
         />
         <StaggerReveal className="mt-10 grid gap-6 md:grid-cols-2">
-          {matches.map((m) => (
-            <MatchCard key={m.id} match={m} />
-          ))}
+          {clubMatches.length > 0
+            ? clubMatches.map((m) => <MatchCard key={m.id} match={m} />)
+            : allMatches.map((m) => <MatchCard key={m.id} match={m} />)
+          }
         </StaggerReveal>
       </section>
 
-      {/* Latest news — feed of breaking stories, transfers & match reports */}
-      <section className="cv-auto container-page py-16">
-        <SectionHeading
-          eyebrow="News"
-          title="The latest from football"
-          subtitle="Breaking stories, transfers and match reports, fresh from the grounds."
-          action={
-            <Link href="/news" className="btn-ghost">
-              All news <ArrowRight className="h-5 w-5" />
-            </Link>
-          }
-        />
-        {news.length > 0 && (
-          <div className="mt-10 space-y-6">
-            <Reveal>
-              <NewsCard item={news[0]} featured />
-            </Reveal>
-            <StaggerReveal className="grid gap-6 sm:grid-cols-3">
-              {news.slice(1, 4).map((n) => (
-                <NewsCard key={n.id} item={n} />
-              ))}
-            </StaggerReveal>
-          </div>
-        )}
+      {/* ── Latest news ── */}
+      <section className="cv-auto bg-surface py-16">
+        <div className="container-page">
+          <SectionHeading
+            eyebrow="News"
+            title="The latest from football"
+            subtitle="Breaking stories, transfers and match reports, fresh from the grounds."
+            action={
+              <Link href="/news" className="btn-ghost">
+                All news <ArrowRight className="h-5 w-5" />
+              </Link>
+            }
+          />
+          {news.length > 0 && (
+            <div className="mt-10 space-y-6">
+              <Reveal>
+                <NewsCard item={news[0]} featured />
+              </Reveal>
+              <StaggerReveal className="grid gap-6 sm:grid-cols-3">
+                {news.slice(1, 4).map((n) => (
+                  <NewsCard key={n.id} item={n} />
+                ))}
+              </StaggerReveal>
+            </div>
+          )}
+        </div>
       </section>
 
+      <LogoMarquee />
       <Stats />
 
-      {/* Fan Power Rankings — live leaderboard of clubs by total fan votes */}
+      {/* ── Fan Power Rankings ── */}
       <section className="cv-auto container-page py-16">
         <SectionHeading
           eyebrow="Fan pulse"
           title="Who the fans are backing"
-          subtitle="Every vote across every poll, added up live. Watch your club climb the rankings in real time."
+          subtitle="Every vote across every poll, added up live. Watch your team climb the rankings in real time."
           action={
             <Link href="/polls" className="btn-ghost">
               Cast your vote <ArrowRight className="h-5 w-5" />
@@ -104,7 +115,7 @@ export default function HomePage() {
         </Reveal>
       </section>
 
-      {/* Latest blogs */}
+      {/* ── Latest blogs ── */}
       <section className="cv-auto container-page py-16">
         <SectionHeading
           eyebrow="Fresh content"
@@ -125,7 +136,7 @@ export default function HomePage() {
 
       <Newsletter />
 
-      {/* CTA band */}
+      {/* ── CTA band ── */}
       <Reveal className="container-page pb-24">
         <div className="flex flex-col items-center justify-between gap-6 overflow-hidden rounded-4xl bg-accent-gradient p-10 text-center shadow-glow sm:flex-row sm:text-left">
           <div>
