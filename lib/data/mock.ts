@@ -199,6 +199,8 @@ export const polls: Poll[] = matches.map((m, i) => {
     [4500, 3900],
     [3100, 4700],
   ][i] ?? [3000, 3000];
+  // Schedule: voting opens 4 days before kickoff, closes 24h before.
+  const k = new Date(m.kickoff).getTime();
   return {
     id: `p${i + 1}`,
     matchId: m.id,
@@ -207,7 +209,9 @@ export const polls: Poll[] = matches.map((m, i) => {
       { teamId: m.homeTeam.id, label: m.homeTeam.name, votes: seed[0] },
       { teamId: m.awayTeam.id, label: m.awayTeam.name, votes: seed[1] },
     ],
-    isOpen: m.status !== "finished",
+    isOpen: true,
+    opensAt: new Date(k - 96 * 3600_000).toISOString(),
+    closesAt: new Date(k - 24 * 3600_000).toISOString(),
   };
 });
 

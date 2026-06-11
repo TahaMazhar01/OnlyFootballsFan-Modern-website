@@ -8,8 +8,7 @@ import { subscribe } from "@/lib/data";
  * (votes, admin edits, the realtime simulation). This is what makes the live
  * poll bars feel real-time in the prototype.
  *
- * Pass a stable `key` (or dependency list) describing the query so it refetches
- * when inputs change.
+ * `fetcher` is included in deps so the hook never runs with a stale fetcher.
  */
 export function useLiveData<T>(
   fetcher: () => Promise<T>,
@@ -20,6 +19,7 @@ export function useLiveData<T>(
 
   useEffect(() => {
     let active = true;
+
     const run = () => {
       fetcher()
         .then((d) => {
@@ -27,14 +27,16 @@ export function useLiveData<T>(
         })
         .catch((e) => console.error("[useLiveData] fetch failed:", e));
     };
+
     run();
     const unsub = subscribe(run);
+
     return () => {
       active = false;
       unsub();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [fetcher, subscribe, ...deps]);
 
   return data;
 }
+

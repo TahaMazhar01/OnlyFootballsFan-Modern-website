@@ -2,14 +2,25 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Radio, Vote as VoteIcon, Lock } from "lucide-react";
+import { Check, Radio, Vote as VoteIcon, Lock, Clock } from "lucide-react";
 import type { Match, Team } from "@/lib/data/types";
-import { getPoll, submitVote } from "@/lib/data";
+import { getPoll, submitVote, pollState } from "@/lib/data";
 import { useLiveData } from "@/hooks/useLiveData";
 import { useToast } from "@/components/ui/Toast";
 import { compactNumber, pct } from "@/lib/format";
 
 const votedKey = (pollId: string) => `off:voted:${pollId}`;
+
+function whenLabel(iso?: string): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 export function LivePoll({
   match,
@@ -23,7 +34,6 @@ export function LivePoll({
   const [votedTeamId, setVotedTeamId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Restore prior vote from localStorage so refreshes remember the choice.
   useEffect(() => {
     if (!poll || typeof window === "undefined") return;
     setVotedTeamId(window.localStorage.getItem(votedKey(poll.id)));
@@ -37,8 +47,12 @@ export function LivePoll({
   const teamFor = (teamId: string): Team =>
     teamId === match.homeTeam.id ? match.homeTeam : match.awayTeam;
 
+  const state = poll ? pollState(poll) : "closed";
+  const open = state === "open";
+  const upcoming = state === "upcoming";
+
   async function handleVote(teamId: string) {
-    if (!poll || !poll.isOpen || votedTeamId || submitting) return;
+    if (!poll || !open || votedTeamId || submitting) return;
     setSubmitting(true);
     setVotedTeamId(teamId); // optimistic
     window.localStorage.setItem(votedKey(poll.id), teamId);
@@ -53,34 +67,44 @@ export function LivePoll({
     );
   }
 
-  const revealed = Boolean(votedTeamId) || !poll.isOpen;
+  // Results are revealed once you've voted (open) or once the poll has closed.
+  // Upcoming polls never reveal results — voting hasn't started yet.
+  const revealed = (open && Boolean(votedTeamId)) || state === "closed";
   const pad = size === "lg" ? "p-6" : size === "sm" ? "p-4" : "p-5";
 
   return (
     <div className={`rounded-2xl bg-canvas ${pad}`}>
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="font-display text-base font-bold text-ink">
-            {poll.question}
-          </span>
-        </div>
-        {poll.isOpen ? (
-          <span className="chip bg-accent-soft text-accent-dark">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <span className="font-display text-base font-bold text-ink">
+          {poll.question}
+        </span>
+        {open ? (
+          <span className="chip shrink-0 bg-accent-soft text-accent-dark">
             <Radio className="h-3.5 w-3.5 animate-pulse-live" /> Live poll
           </span>
+        ) : upcoming ? (
+          <span className="chip shrink-0 bg-navy/10 text-navy">
+            <Clock className="h-3.5 w-3.5" /> Upcoming
+          </span>
         ) : (
-          <span className="chip bg-line text-muted">
+          <span className="chip shrink-0 bg-line text-muted">
             <Lock className="h-3.5 w-3.5" /> Closed
           </span>
         )}
       </div>
+
+      {upcoming && (
+        <div className="mb-3 rounded-xl bg-navy/5 px-4 py-2.5 text-sm font-semibold text-navy">
+          Voting opens {whenLabel(poll.opensAt)}
+        </div>
+      )}
 
       <div className="space-y-3">
         {poll.options.map((opt) => {
           const team = teamFor(opt.teamId);
           const percent = pct(opt.votes, total);
           const chosen = votedTeamId === opt.teamId;
-          const clickable = poll.isOpen && !votedTeamId && !submitting;
+          const clickable = open && !votedTeamId && !submitting;
           return (
             <button
               key={opt.teamId}
@@ -95,7 +119,6 @@ export function LivePoll({
                     : "border-line"
               }`}
             >
-              {/* animated fill bar */}
               <motion.span
                 className="absolute inset-y-0 left-0 -z-0"
                 style={{
@@ -136,7 +159,7 @@ export function LivePoll({
                       >
                         {percent}%
                       </motion.span>
-                    ) : (
+                    ) : open ? (
                       <motion.span
                         key="cta"
                         initial={{ opacity: 0 }}
@@ -145,6 +168,15 @@ export function LivePoll({
                         className="chip bg-navy text-white group-hover:bg-accent-dark"
                       >
                         <VoteIcon className="h-3.5 w-3.5" /> Vote
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="soon"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-xs font-semibold text-muted"
+                      >
+                        soon
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -160,17 +192,18 @@ export function LivePoll({
           <span className="font-bold text-ink">{compactNumber(total)}</span>{" "}
           votes
         </span>
-        {revealed ? (
-          <span>{poll.isOpen ? "Live results — updating" : "Final result"}</span>
+        {upcoming ? (
+          <span>Get ready — voting opens soon</span>
+        ) : revealed ? (
+          <span>{open ? "Live results — updating" : "Final result"}</span>
         ) : (
-          <span>Tap your team to vote</span>
+          <span>Tap your team to vote · closes {whenLabel(poll.closesAt)}</span>
         )}
       </div>
     </div>
   );
 }
 
-// hex -> rgba string with alpha
 function hexA(hex: string, alpha: number): string {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.replace(/(.)/g, "$1$1") : h;

@@ -1,6 +1,6 @@
 "use client";
 
-import { getMatches, getPolls } from "@/lib/data";
+import { getMatches, getPolls, pollState } from "@/lib/data";
 import type { Match, Poll } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { LivePoll } from "@/components/match/LivePoll";
@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { staggerContainer, staggerItem } from "@/components/ui/Reveal";
 import { motion } from "framer-motion";
 import { kickoffLabel } from "@/lib/format";
-import { Lock, Radio } from "lucide-react";
+import { Lock, Radio, Clock } from "lucide-react";
 
 export default function PollsPage() {
   const matches = useLiveData(() => getMatches(), [] as Match[], []);
@@ -24,15 +24,16 @@ export default function PollsPage() {
         new Date(b.match.kickoff).getTime(),
     );
 
-  const open = withPoll.filter((x) => x.poll.isOpen);
-  const closed = withPoll.filter((x) => !x.poll.isOpen);
+  const open = withPoll.filter((x) => pollState(x.poll) === "open");
+  const upcoming = withPoll.filter((x) => pollState(x.poll) === "upcoming");
+  const closed = withPoll.filter((x) => pollState(x.poll) === "closed");
 
   return (
     <>
       <PageHeader
         eyebrow="Have your say"
         title="Fan Polls"
-        subtitle="Back your team before kickoff. Voting closes 24 hours before each match — so get your prediction in early."
+        subtitle="Back your team before kickoff. Each poll opens early and closes 24 hours before the match — get your prediction in on time."
       />
 
       <section className="container-page space-y-12 py-12">
@@ -41,8 +42,16 @@ export default function PollsPage() {
           label="Open for voting"
           tone="bg-accent-soft text-accent-dark ring-accent/30"
           items={open}
-          empty="No open polls right now — check back when the next fixtures are announced."
+          empty="No open polls right now — check the upcoming ones below."
         />
+        {upcoming.length > 0 && (
+          <PollGroup
+            icon={<Clock className="h-4 w-4" />}
+            label="Upcoming polls"
+            tone="bg-navy/10 text-navy ring-navy/20"
+            items={upcoming}
+          />
+        )}
         {closed.length > 0 && (
           <PollGroup
             icon={<Lock className="h-4 w-4" />}

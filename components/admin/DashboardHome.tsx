@@ -11,7 +11,7 @@ import {
   Radio,
   ArrowRight,
 } from "lucide-react";
-import { getMatches, getBlogs, getPosters, getPolls } from "@/lib/data";
+import { getMatches, getBlogs, getPosters, getPolls, pollState } from "@/lib/data";
 import type { Match, BlogPost, Poster, Poll } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import type { AdminView } from "@/app/admin/page";
@@ -36,7 +36,7 @@ export function DashboardHome({ go }: { go: (v: AdminView) => void }) {
 
   const stats = [
     { icon: Activity, label: "Matches", value: matches.length },
-    { icon: Radio, label: "Open polls", value: polls.filter((p) => p.isOpen).length },
+    { icon: Radio, label: "Open polls", value: polls.filter((p) => pollState(p) === "open").length },
     { icon: FileText, label: "Blog posts", value: blogs.length },
     { icon: ImageIcon, label: "Posters", value: posters.length },
   ];

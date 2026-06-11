@@ -21,6 +21,10 @@ export function AddMatchForm({ onDone }: { onDone?: () => void }) {
   const [time, setTime] = useState("");
   const [status, setStatus] = useState<MatchStatus>("upcoming");
   const [poster, setPoster] = useState("");
+  // Poll scheduling (optional — defaults: opens now, closes 24h before kickoff)
+  const [pollQuestion, setPollQuestion] = useState("Who will win?");
+  const [pollOpens, setPollOpens] = useState("");
+  const [pollCloses, setPollCloses] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -34,23 +38,32 @@ export function AddMatchForm({ onDone }: { onDone?: () => void }) {
       date && time
         ? new Date(`${date}T${time}`).toISOString()
         : new Date(Date.now() + 3 * 3600_000).toISOString();
-    await createMatch({
-      homeTeam: teams[home],
-      awayTeam: teams[away],
-      kickoff,
-      status,
-      competition,
-      venue: venue || "TBD",
-      posterUrl: poster || undefined,
-      ...(status !== "upcoming" ? { score: { home: 0, away: 0 } } : {}),
-    });
+    await createMatch(
+      {
+        homeTeam: teams[home],
+        awayTeam: teams[away],
+        kickoff,
+        status,
+        competition,
+        venue: venue || "TBD",
+        posterUrl: poster || undefined,
+        ...(status !== "upcoming" ? { score: { home: 0, away: 0 } } : {}),
+      },
+      {
+        question: pollQuestion,
+        opensAt: pollOpens ? new Date(pollOpens).toISOString() : undefined,
+        closesAt: pollCloses ? new Date(pollCloses).toISOString() : undefined,
+      },
+    );
     setSaving(false);
-    toast("Match added and its poll is live! ⚽");
+    toast("Match added and its poll is scheduled! ⚽");
     onDone?.();
     setVenue("");
     setDate("");
     setTime("");
     setPoster("");
+    setPollOpens("");
+    setPollCloses("");
   }
 
   return (
@@ -108,18 +121,49 @@ export function AddMatchForm({ onDone }: { onDone?: () => void }) {
         <Field label="Match poster" hint="A bold image shown on the match card.">
           <ImageDropzone value={poster} onChange={setPoster} label="Upload poster" />
         </Field>
-        <div className="flex items-start gap-3 rounded-2xl border border-line bg-canvas p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-dark">
-            <Sparkles className="h-5 w-5" />
-          </span>
-          <p className="text-sm text-muted">
-            <span className="font-bold text-ink">Heads up:</span> a live poll
-            (“Who will win?”) is created automatically for every match. Later,
-            API-Football can auto-fill teams, kickoff and scores here.
+        {/* Poll settings */}
+        <div className="space-y-4 rounded-2xl border border-line bg-canvas p-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-soft text-accent-dark">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <p className="font-display text-base font-bold text-ink">
+              Fan poll for this match
+            </p>
+          </div>
+          <Field label="Poll question">
+            <input
+              className={inputClass}
+              value={pollQuestion}
+              onChange={(e) => setPollQuestion(e.target.value)}
+              placeholder="Who will win?"
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Voting opens" hint="Blank = right away">
+              <input
+                type="datetime-local"
+                className={inputClass}
+                value={pollOpens}
+                onChange={(e) => setPollOpens(e.target.value)}
+              />
+            </Field>
+            <Field label="Voting closes" hint="Blank = 24h before kickoff">
+              <input
+                type="datetime-local"
+                className={inputClass}
+                value={pollCloses}
+                onChange={(e) => setPollCloses(e.target.value)}
+              />
+            </Field>
+          </div>
+          <p className="text-xs text-muted">
+            Before it opens the poll shows as <b>Upcoming</b>, then <b>Open</b>{" "}
+            for voting, then <b>Closed</b> with results.
           </p>
         </div>
         <button type="submit" disabled={saving} className="btn-primary w-full text-lg">
-          <Save className="h-5 w-5" /> {saving ? "Saving…" : "Add match"}
+          <Save className="h-5 w-5" /> {saving ? "Saving…" : "Add match & schedule poll"}
         </button>
       </div>
     </form>

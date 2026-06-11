@@ -72,7 +72,7 @@ export function Navbar() {
                 </span>
                 {active && (
                   <motion.div
-                    layoutId="lamp"
+                    layoutId={`lamp-${item.url}`}
                     className="absolute inset-0 -z-10 w-full rounded-full bg-accent/15"
                     initial={false}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}

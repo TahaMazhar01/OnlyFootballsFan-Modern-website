@@ -35,12 +35,19 @@ export interface PollOption {
   votes: number;
 }
 
+export type PollState = "upcoming" | "open" | "closed";
+
 export interface Poll {
   id: string;
   matchId: string;
   question: string;
   options: PollOption[];
+  /** Admin master switch — when false the poll is force-closed regardless of dates. */
   isOpen: boolean;
+  /** Voting opens at this time. Before it, the poll is "upcoming". */
+  opensAt?: string;
+  /** Voting closes at this time. After it, the poll is "closed" (results shown). */
+  closesAt?: string;
 }
 
 export interface Vote {

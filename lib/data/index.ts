@@ -2,6 +2,7 @@ import type {
   Match,
   MatchStatus,
   Poll,
+  PollState,
   BlogPost,
   Poster,
   NewsItem,
@@ -82,28 +83,41 @@ export async function getScores(
 
 // Voting closes one full day before kickoff. A poll is only truly open if the
 // admin hasn't closed it AND we're more than 24h before the match starts.
-const POLL_LEAD_MS = 24 * 60 * 60 * 1000;
+const POLL_LEAD_MS = 24 * 60 * 60 * 1000; // legacy fallback: close 24h before kickoff
 
-export function isPollVotingOpen(poll: Poll, match?: Match): boolean {
-  if (!poll.isOpen) return false;
-  if (!match) return poll.isOpen;
-  return Date.now() < new Date(match.kickoff).getTime() - POLL_LEAD_MS;
+/**
+ * The lifecycle state of a poll, driven by its opensAt / closesAt schedule:
+ *  - "upcoming": before opensAt (voting hasn't started)
+ *  - "open":     between opensAt and closesAt (votable)
+ *  - "closed":   after closesAt, OR admin force-closed (isOpen=false) — results
+ * Polls created before scheduling existed fall back to: open now, close 24h
+ * before kickoff.
+ */
+export function pollState(poll: Poll): PollState {
+  if (!poll.isOpen) return "closed"; // admin master switch off
+  const now = Date.now();
+  if (poll.opensAt && now < new Date(poll.opensAt).getTime()) return "upcoming";
+  let closeMs = poll.closesAt ? new Date(poll.closesAt).getTime() : undefined;
+  if (closeMs === undefined) {
+    const match = getDB().matches.find((m) => m.id === poll.matchId);
+    if (match) closeMs = new Date(match.kickoff).getTime() - POLL_LEAD_MS;
+  }
+  if (closeMs !== undefined && now >= closeMs) return "closed";
+  return "open";
 }
 
-function withEffectiveOpen(poll: Poll): Poll {
-  const match = getDB().matches.find((m) => m.id === poll.matchId);
-  return { ...poll, isOpen: isPollVotingOpen(poll, match) };
+export function isPollVotingOpen(poll: Poll): boolean {
+  return pollState(poll) === "open";
 }
 
 export async function getPoll(matchId: string): Promise<Poll | undefined> {
   await delay();
-  const poll = getDB().polls.find((p) => p.matchId === matchId);
-  return poll ? withEffectiveOpen(poll) : undefined;
+  return getDB().polls.find((p) => p.matchId === matchId);
 }
 
 export async function getPolls(): Promise<Poll[]> {
   await delay();
-  return getDB().polls.map(withEffectiveOpen);
+  return [...getDB().polls];
 }
 
 /** Record a vote for a team option and return the updated poll. */
@@ -114,12 +128,11 @@ export async function submitVote(
   await delay(80);
   const poll = getDB().polls.find((p) => p.id === pollId);
   if (!poll) return undefined;
-  const match = getDB().matches.find((m) => m.id === poll.matchId);
-  if (!isPollVotingOpen(poll, match)) return withEffectiveOpen(poll); // closed
+  if (pollState(poll) !== "open") return poll; // not votable
   const opt = poll.options.find((o) => o.teamId === optionTeamId);
   if (opt) opt.votes += 1;
   notify();
-  return withEffectiveOpen(poll);
+  return poll;
 }
 
 export async function setPollOpen(
@@ -219,20 +232,26 @@ export async function getActivity(limit = 20): Promise<Activity[]> {
 
 export async function createMatch(
   input: Omit<Match, "id"> & { id?: string },
+  pollOpts?: { question?: string; opensAt?: string; closesAt?: string },
 ): Promise<Match> {
   const db = getDB();
   const match: Match = { ...input, id: input.id ?? uid("m") };
   db.matches.push(match);
-  // Auto-create the poll for this match.
+  // Auto-create (and schedule) the poll for this match. Defaults: open now,
+  // close 24h before kickoff.
+  const kickoffMs = new Date(match.kickoff).getTime();
   db.polls.push({
     id: uid("p"),
     matchId: match.id,
-    question: "Who will win?",
+    question: pollOpts?.question?.trim() || "Who will win?",
     options: [
       { teamId: match.homeTeam.id, label: match.homeTeam.name, votes: 0 },
       { teamId: match.awayTeam.id, label: match.awayTeam.name, votes: 0 },
     ],
-    isOpen: match.status !== "finished",
+    isOpen: true,
+    opensAt: pollOpts?.opensAt || new Date().toISOString(),
+    closesAt:
+      pollOpts?.closesAt || new Date(kickoffMs - POLL_LEAD_MS).toISOString(),
   });
   logActivity(
     "created",
@@ -355,7 +374,7 @@ export async function deleteNews(id: string): Promise<void> {
 export function startLiveVoteSimulation(intervalMs = 3500): () => void {
   if (typeof window === "undefined") return () => {};
   const timer = window.setInterval(() => {
-    const open = getDB().polls.filter((p) => p.isOpen);
+    const open = getDB().polls.filter((p) => pollState(p) === "open");
     if (!open.length) return;
     const poll = open[Math.floor(Math.random() * open.length)];
     const opt =

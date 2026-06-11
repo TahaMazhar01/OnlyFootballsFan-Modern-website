@@ -19,13 +19,14 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
 
 export default function HomePage() {
-  const allMatches = useLiveData(
+  const clubMatches = useLiveData(
     async () => {
       const { matches: all } = await getScores();
-      return [
-        ...all.filter((m) => m.status === "live"),
-        ...all.filter((m) => m.status === "upcoming"),
-      ].slice(0, 4);
+      return all.filter((m) =>
+        !m.competition.toLowerCase().includes("fifa") &&
+        !m.competition.toLowerCase().includes("world cup") &&
+        (m.status === "live" || m.status === "upcoming")
+      ).slice(0, 4);
     },
     [] as Match[],
     [],
@@ -33,26 +34,20 @@ export default function HomePage() {
   const blogs = useLiveData(async () => (await getBlogs()).slice(0, 3), [] as BlogPost[], []);
   const news = useLiveData(async () => (await getNews(4)), [] as NewsItem[], []);
 
-  // Separate FIFA matches for the specialised section
-  const clubMatches = allMatches.filter(
-    (m) => !m.competition.toLowerCase().includes("fifa") &&
-           !m.competition.toLowerCase().includes("world cup")
-  );
-
   return (
     <>
       <Hero />
       <LiveStrip />
 
-      {/* ── FIFA World Cup matches (hero-level prominence) ── */}
+      {/* ── FIFA World Cup section ── */}
       <FifaMatches />
 
-      {/* ── Club matches + live polls ── */}
+      {/* ── Club / League matches ── */}
       <section className="cv-auto container-page py-16">
         <SectionHeading
-          eyebrow="Club football"
+          eyebrow="League football"
           title="Live & upcoming scores"
-          subtitle="Real-time scores and the fixtures on their way from the top leagues."
+          subtitle="Premier League, LaLiga, Champions League and more."
           action={
             <Link href="/matches" className="btn-ghost">
               All scores <ArrowRight className="h-5 w-5" />
@@ -62,7 +57,7 @@ export default function HomePage() {
         <StaggerReveal className="mt-10 grid gap-6 md:grid-cols-2">
           {clubMatches.length > 0
             ? clubMatches.map((m) => <MatchCard key={m.id} match={m} />)
-            : allMatches.map((m) => <MatchCard key={m.id} match={m} />)
+            : null
           }
         </StaggerReveal>
       </section>

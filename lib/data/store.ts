@@ -16,7 +16,7 @@ import {
 //       and Supabase Realtime subscriptions (no UI changes required).
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY = "off:db:v3";
+const STORAGE_KEY = "off:db:v4";
 
 export interface DB {
   matches: Match[];

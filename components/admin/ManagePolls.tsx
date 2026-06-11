@@ -1,11 +1,21 @@
 "use client";
 
-import { getPolls, getMatches, setPollOpen } from "@/lib/data";
+import { getPolls, getMatches, setPollOpen, pollState } from "@/lib/data";
 import type { Poll, Match } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { compactNumber, pct } from "@/lib/format";
 import { useToast } from "@/components/ui/Toast";
-import { Lock, Unlock } from "lucide-react";
+import { Lock, Unlock, Radio, Clock } from "lucide-react";
+
+const fmt = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : "—";
 
 export function ManagePolls() {
   const toast = useToast();
@@ -16,7 +26,7 @@ export function ManagePolls() {
 
   async function toggle(p: Poll) {
     await setPollOpen(p.id, !p.isOpen);
-    toast(p.isOpen ? "Poll closed" : "Poll re-opened", "info");
+    toast(p.isOpen ? "Poll force-closed" : "Poll re-enabled", "info");
   }
 
   if (!polls.length) {
@@ -28,15 +38,27 @@ export function ManagePolls() {
       {polls.map((p) => {
         const m = matchOf(p.matchId);
         const total = p.options.reduce((s, o) => s + o.votes, 0);
+        const state = pollState(p);
+        const stateChip =
+          state === "open"
+            ? { cls: "bg-accent-soft text-accent-dark", icon: <Radio className="h-3.5 w-3.5 animate-pulse-live" />, label: "Open" }
+            : state === "upcoming"
+              ? { cls: "bg-navy/10 text-navy", icon: <Clock className="h-3.5 w-3.5" />, label: "Upcoming" }
+              : { cls: "bg-line text-muted", icon: <Lock className="h-3.5 w-3.5" />, label: "Closed" };
         return (
           <div key={p.id} className="card p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-display text-lg font-bold">
-                  {m ? `${m.homeTeam.name} vs ${m.awayTeam.name}` : p.matchId}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="font-display text-lg font-bold">
+                    {m ? `${m.homeTeam.name} vs ${m.awayTeam.name}` : p.matchId}
+                  </p>
+                  <span className={`chip ${stateChip.cls}`}>
+                    {stateChip.icon} {stateChip.label}
+                  </span>
+                </div>
                 <p className="text-sm text-muted">
-                  {compactNumber(total)} votes · {m?.competition ?? "—"}
+                  {p.question} · {compactNumber(total)} votes
                 </p>
               </div>
               <button
@@ -48,9 +70,12 @@ export function ManagePolls() {
                 }`}
               >
                 {p.isOpen ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                {p.isOpen ? "Open: click to close" : "Closed: click to open"}
+                {p.isOpen ? "Force close" : "Re-enable"}
               </button>
             </div>
+            <p className="mb-4 text-xs text-muted">
+              Opens {fmt(p.opensAt)} · Closes {fmt(p.closesAt)}
+            </p>
             <div className="space-y-2.5">
               {p.options.map((o) => {
                 const percent = pct(o.votes, total);
