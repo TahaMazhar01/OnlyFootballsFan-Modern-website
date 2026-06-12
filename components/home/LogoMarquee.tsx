@@ -3,17 +3,20 @@
 import { teams } from "@/lib/data/mock";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 
-// Continuously scrolling strip of clubs (à la "70+ teams. 1 app.").
-// Uses brand-crest badges so nothing ever renders broken; structured so real
-// club logo images can be dropped into TeamBadge later.
+// World Cup nations strip — continuously scrolling. Uses brand-crest badges so
+// nothing ever renders broken; real flag images can be dropped into TeamBadge.
+const NATIONS = [
+  "arg", "bra", "fra", "ger", "esp", "eng", "por", "ned", "ita", "uru", "bel",
+];
+
 export function LogoMarquee() {
-  const list = Object.values(teams);
+  const list = NATIONS.map((id) => teams[id]).filter(Boolean);
   const row = [...list, ...list]; // doubled for a seamless -50% loop
 
   return (
     <section className="border-y border-line bg-surface/70 py-9">
       <p className="container-page mb-7 text-center font-display text-sm font-bold uppercase tracking-[0.22em] text-muted">
-        Backed by fans of the world&apos;s biggest clubs
+        Backed by fans of every World Cup nation
       </p>
       <div
         className="group relative overflow-hidden"

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getScores, getMatches, getBlogs, getNews } from "@/lib/data";
-import type { Match, BlogPost, NewsItem } from "@/lib/data/types";
+import { getBlogs, getNews } from "@/lib/data";
+import type { BlogPost, NewsItem } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { Hero } from "@/components/home/Hero";
 import { FifaMatches } from "@/components/home/FifaMatches";
@@ -12,32 +12,12 @@ import { LogoMarquee } from "@/components/home/LogoMarquee";
 import { Stats } from "@/components/home/Stats";
 import { Newsletter } from "@/components/home/Newsletter";
 import { FanPowerRankings } from "@/components/home/FanPowerRankings";
-import { MatchCard } from "@/components/match/MatchCard";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { NewsCard } from "@/components/news/NewsCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal, StaggerReveal } from "@/components/ui/Reveal";
 
 export default function HomePage() {
-  const clubMatches = useLiveData(
-    async () => {
-      const isClub = (m: Match) =>
-        !m.competition.toLowerCase().includes("fifa") &&
-        !m.competition.toLowerCase().includes("world cup") &&
-        (m.status === "live" || m.status === "upcoming");
-      const { matches: all } = await getScores();
-      let club = all.filter(isClub);
-      // The live API only carries World Cup fixtures during the tournament, so
-      // fall back to our league fixtures (PL / LaLiga / UCL …) — never empty.
-      if (club.length === 0) {
-        const store = await getMatches();
-        club = store.filter(isClub);
-      }
-      return club.slice(0, 4);
-    },
-    [] as Match[],
-    [],
-  );
   const blogs = useLiveData(async () => (await getBlogs()).slice(0, 3), [] as BlogPost[], []);
   const news = useLiveData(async () => (await getNews(4)), [] as NewsItem[], []);
 
@@ -46,28 +26,8 @@ export default function HomePage() {
       <Hero />
       <LiveStrip />
 
-      {/* ── FIFA World Cup section ── */}
+      {/* ── FIFA World Cup matches (the main event) ── */}
       <FifaMatches />
-
-      {/* ── Club / League matches ── */}
-      <section className="cv-auto container-page py-16">
-        <SectionHeading
-          eyebrow="League football"
-          title="Live & upcoming scores"
-          subtitle="Premier League, LaLiga, Champions League and more."
-          action={
-            <Link href="/matches" className="btn-ghost">
-              All scores <ArrowRight className="h-5 w-5" />
-            </Link>
-          }
-        />
-        <StaggerReveal className="mt-10 grid gap-6 md:grid-cols-2">
-          {clubMatches.length > 0
-            ? clubMatches.map((m) => <MatchCard key={m.id} match={m} />)
-            : null
-          }
-        </StaggerReveal>
-      </section>
 
       {/* ── Latest news ── */}
       <section className="cv-auto bg-surface py-16">

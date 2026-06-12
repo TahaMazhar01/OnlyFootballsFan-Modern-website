@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { getMatches } from "@/lib/data";
+import { getScores } from "@/lib/data";
 import { useLiveData } from "@/hooks/useLiveData";
 import type { Match } from "@/lib/data/types";
 
 export function LiveStrip() {
-  // Show live first, then upcoming, so the strip is always populated.
+  // Real World Cup fixtures: live first, then upcoming, so it's always populated.
   const matches = useLiveData(
     async () => {
-      const all = await getMatches();
+      const { matches: all } = await getScores();
       return [
         ...all.filter((m) => m.status === "live"),
         ...all.filter((m) => m.status === "upcoming"),

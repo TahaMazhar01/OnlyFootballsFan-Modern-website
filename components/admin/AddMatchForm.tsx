@@ -13,9 +13,9 @@ const teamList = Object.values(teams);
 
 export function AddMatchForm({ onDone }: { onDone?: () => void }) {
   const toast = useToast();
-  const [home, setHome] = useState("mci");
-  const [away, setAway] = useState("liv");
-  const [competition, setCompetition] = useState("Premier League");
+  const [home, setHome] = useState("arg");
+  const [away, setAway] = useState("bra");
+  const [competition, setCompetition] = useState("FIFA World Cup");
   const [venue, setVenue] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");

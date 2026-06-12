@@ -31,7 +31,7 @@ export function FanPowerRankings() {
           <div>
             <h3 className="text-xl leading-tight">Fan Power Rankings</h3>
             <p className="text-sm text-muted">
-              Total votes backing each club, all polls combined
+              Total votes backing each nation, all polls combined
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function FanPowerRankings() {
       </div>
 
       <p className="mt-5 text-center text-sm text-muted">
-        Every vote counts — the more your club is backed, the higher it climbs.
+        Every vote counts — the more your nation is backed, the higher it climbs.
       </p>
     </div>
   );
