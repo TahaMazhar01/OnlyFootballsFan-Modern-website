@@ -9,8 +9,10 @@ import type {
   Activity,
   ActivityAction,
   ActivityEntity,
+  GroupTable,
 } from "./types";
 import { getDB, notify, subscribe } from "./store";
+import { standings as mockStandings } from "./mock";
 
 // ---------------------------------------------------------------------------
 // PUBLIC DATA ACCESS LAYER
@@ -77,6 +79,34 @@ export async function getScores(
     }
   }
   return { matches: await getMatches(status), live: false };
+}
+
+/**
+ * World Cup group standings. Tries the /api/standings proxy (real groups when
+ * the API key is set); otherwise falls back to demo groups so the section
+ * always renders.
+ */
+export async function getStandings(): Promise<{
+  groups: GroupTable[];
+  live: boolean;
+}> {
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/standings", { cache: "no-store" });
+      if (res.ok) {
+        const data = (await res.json()) as {
+          live?: boolean;
+          groups?: GroupTable[];
+        };
+        if (data.live && Array.isArray(data.groups) && data.groups.length) {
+          return { groups: data.groups, live: true };
+        }
+      }
+    } catch {
+      /* fall back to demo groups */
+    }
+  }
+  return { groups: mockStandings, live: false };
 }
 
 // ------------------------------ Polls -------------------------------------

@@ -5,6 +5,7 @@ import type {
   BlogPost,
   Poster,
   NewsItem,
+  GroupTable,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -100,6 +101,47 @@ export const matches: Match[] = [
     venue: "Stadio Olimpico",
     posterUrl: img("1560272564-c83b4b0c1c5d"),
     score: { home: 2, away: 1 },
+  },
+];
+
+// Demo group standings — only used when the live API has no data (no token).
+const row = (
+  position: number,
+  team: Team,
+  played: number,
+  won: number,
+  draw: number,
+  lost: number,
+  goalDifference: number,
+) => ({
+  position,
+  team,
+  played,
+  won,
+  draw,
+  lost,
+  goalDifference,
+  points: won * 3 + draw,
+});
+
+export const standings: GroupTable[] = [
+  {
+    group: "Group A",
+    table: [
+      row(1, teams.arg, 2, 2, 0, 0, 4),
+      row(2, teams.fra, 2, 1, 1, 0, 2),
+      row(3, teams.eng, 2, 0, 1, 1, -1),
+      row(4, teams.esp, 2, 0, 0, 2, -5),
+    ],
+  },
+  {
+    group: "Group B",
+    table: [
+      row(1, teams.bra, 2, 2, 0, 0, 3),
+      row(2, teams.ger, 2, 1, 0, 1, 1),
+      row(3, teams.por, 2, 1, 0, 1, 0),
+      row(4, teams.ned, 2, 0, 0, 2, -4),
+    ],
   },
 ];
 

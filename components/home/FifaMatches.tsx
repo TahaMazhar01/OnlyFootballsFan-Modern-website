@@ -24,11 +24,11 @@ const isFifa = (m: Match) => {
 export function FifaMatches() {
   const { matches } = useLiveData(() => getScores(), EMPTY, []);
   const fifa = matches.filter(isFifa);
-  // Live first, then upcoming, then finished.
-  const order = { live: 0, upcoming: 1, finished: 2 } as const;
+  // Live first, then latest results, then what's coming up.
+  const order = { live: 0, finished: 1, upcoming: 2 } as const;
   const shown = [...fifa]
     .sort((a, b) => order[a.status] - order[b.status])
-    .slice(0, 4);
+    .slice(0, 8);
 
   if (shown.length === 0) return null;
 

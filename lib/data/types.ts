@@ -79,6 +79,22 @@ export interface Poster {
   createdAt: string;
 }
 
+export interface StandingRow {
+  position: number;
+  team: Team;
+  played: number;
+  won: number;
+  draw: number;
+  lost: number;
+  goalDifference: number;
+  points: number;
+}
+
+export interface GroupTable {
+  group: string; // e.g. "Group A"
+  table: StandingRow[];
+}
+
 export interface NewsItem {
   id: string;
   title: string;

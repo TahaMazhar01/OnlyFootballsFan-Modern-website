@@ -7,7 +7,9 @@ import { getScores } from "@/lib/data";
 import type { Match, MatchStatus } from "@/lib/data/types";
 import { useLiveData } from "@/hooks/useLiveData";
 import { MatchCard } from "@/components/match/MatchCard";
+import { GroupStandings } from "@/components/match/GroupStandings";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { staggerContainer, staggerItem } from "@/components/ui/Reveal";
 
 type Filter = "all" | MatchStatus;
@@ -26,8 +28,9 @@ export default function ScoresPage() {
   const { matches, live } = data;
 
   const liveCount = matches.filter((m) => m.status === "live").length;
-  const shown =
-    filter === "all" ? matches : matches.filter((m) => m.status === filter);
+  const shown = (
+    filter === "all" ? matches : matches.filter((m) => m.status === filter)
+  ).slice(0, 30); // cap the (104-match) tournament list to the nearest fixtures
 
   return (
     <>
@@ -77,7 +80,21 @@ export default function ScoresPage() {
         </div>
       </PageHeader>
 
+      {/* Group stage tables */}
+      <section className="container-page pt-12">
+        <SectionHeading
+          eyebrow="Group stage"
+          title="World Cup groups"
+          subtitle="Standings update automatically as group-stage results come in."
+        />
+        <div className="mt-8">
+          <GroupStandings />
+        </div>
+      </section>
+
       <section className="container-page py-14">
+        <SectionHeading eyebrow="Matchday" title="Fixtures & results" />
+        <div className="mt-8" />
         {shown.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-line bg-surface p-16 text-center">
             <p className="font-display text-2xl font-bold">No matches here yet</p>

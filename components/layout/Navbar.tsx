@@ -22,7 +22,7 @@ interface NavItem {
 
 const items: NavItem[] = [
   { name: "Home", url: "/", icon: Home },
-  { name: "Scores", url: "/matches", icon: Trophy },
+  { name: "Matches", url: "/matches", icon: Trophy },
   { name: "Polls", url: "/polls", icon: Vote },
   { name: "News", url: "/news", icon: Newspaper },
   { name: "About", url: "/about", icon: Info },

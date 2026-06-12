@@ -80,10 +80,6 @@ function toMatch(m: FdMatch): Match {
   };
 }
 
-function ymd(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
 export async function GET() {
   const token = process.env.FOOTBALL_DATA_TOKEN;
   if (!token) {
@@ -91,9 +87,10 @@ export async function GET() {
   }
 
   try {
-    const today = new Date();
-    const to = new Date(today.getTime() + 3 * 86_400_000); // today + 3 days
-    const url = `${FD_BASE}/matches?dateFrom=${ymd(today)}&dateTo=${ymd(to)}`;
+    // The World Cup competition endpoint returns the whole tournament —
+    // finished, live AND upcoming fixtures — with no date-range limit (the
+    // generic /matches range is capped on the free tier).
+    const url = `${FD_BASE}/competitions/WC/matches`;
     const res = await fetch(url, {
       headers: { "X-Auth-Token": token },
       next: { revalidate: 30 },
