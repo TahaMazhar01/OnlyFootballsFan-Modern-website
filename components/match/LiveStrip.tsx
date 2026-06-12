@@ -20,7 +20,11 @@ export function LiveStrip() {
   );
 
   if (!matches.length) return null;
-  const loop = [...matches, ...matches];
+  // Cap the ticker + scale its speed to the item count so it always scrolls at
+  // a calm, readable pace (more items would otherwise whip past).
+  const list = matches.slice(0, 14);
+  const loop = [...list, ...list];
+  const durationS = Math.max(36, list.length * 4.5);
 
   return (
     <div className="border-y border-line bg-navy text-white">
@@ -29,7 +33,10 @@ export function LiveStrip() {
           <span className="live-dot" /> Live now
         </span>
         <div className="relative flex-1 overflow-hidden no-scrollbar">
-          <div className="flex w-max gap-3 animate-marquee hover:[animation-play-state:paused]">
+          <div
+            className="flex w-max gap-3 animate-marquee hover:[animation-play-state:paused]"
+            style={{ animationDuration: `${durationS}s` }}
+          >
             {loop.map((m, i) => (
               <Link
                 key={`${m.id}-${i}`}
