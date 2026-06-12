@@ -241,7 +241,7 @@ export const posters: Poster[] = [
   { id: "g3", title: "Into the Net", caption: "The moment it hit", imageUrl: img("1577223625816-7546f13df25d"), createdAt: hours(-20) },
   { id: "g4", title: "Pitch Perfect", caption: "Ready for kickoff", imageUrl: img("1489944440615-453fc2b6a9a9"), createdAt: hours(-30) },
   { id: "g5", title: "Floodlights", caption: "Stadium glow", imageUrl: img("1431324155629-1a6deb1dec8d"), createdAt: hours(-44) },
-  { id: "g6", title: "Full Stretch", caption: "Everything on the line", imageUrl: img("1508098682722-e99c43a406b2"), createdAt: hours(-60) },
+  { id: "g6", title: "Full Stretch", caption: "Everything on the line", imageUrl: img("1577223625816-7546f13df25d"), createdAt: hours(-60) },
   { id: "g7", title: "The Faithful", caption: "Fans in full voice", imageUrl: img("1606925797300-0b35e9d1794e"), createdAt: hours(-72) },
   { id: "g8", title: "Solo Run", caption: "Breaking the line", imageUrl: img("1543326727-cf6c39e8f84c"), createdAt: hours(-90) },
 ];
@@ -272,7 +272,7 @@ export const news: NewsItem[] = [
     title: "Tactical breakdown: how the back three changed the game",
     summary:
       "A half-time switch swung the midfield battle. We chalk up the key movements that decided it.",
-    imageUrl: img("1508098682722-e99c43a406b2"),
+    imageUrl: img("1577223625816-7546f13df25d"),
     category: "Match Report",
     source: "OnlyFootballsFan",
     publishedAt: hours(-9),

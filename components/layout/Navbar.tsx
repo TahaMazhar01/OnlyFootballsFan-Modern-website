@@ -9,10 +9,10 @@ import {
   Vote,
   Newspaper,
   Info,
-  Flame,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/layout/Logo";
 
 interface NavItem {
   name: string;
@@ -39,14 +39,9 @@ export function Navbar() {
       <div className="fixed left-4 top-4 z-50 sm:left-6 sm:top-5">
         <Link
           href="/"
-          className="group flex items-center gap-2.5 rounded-full border border-line bg-white/95 py-2 pl-2 pr-3 shadow-soft transition-transform hover:-translate-y-0.5"
+          className="group flex items-center rounded-full border border-line bg-white/95 px-3 py-1.5 shadow-soft transition-transform hover:-translate-y-0.5"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-gradient shadow-glow transition-transform group-hover:scale-110">
-            <Flame className="h-5 w-5 text-navy" strokeWidth={2.5} />
-          </span>
-          <span className="hidden font-display text-lg font-extrabold tracking-tight text-ink lg:inline">
-            OnlyFootballs<span className="text-accent-dark">Fan</span>
-          </span>
+          <Logo height={32} />
         </Link>
       </div>
 
