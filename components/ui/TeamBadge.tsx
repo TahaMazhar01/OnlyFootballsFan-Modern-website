@@ -16,10 +16,14 @@ export function TeamBadge({
   team,
   size = "md",
   className = "",
+  eager = false,
 }: {
   team: Team;
   size?: keyof typeof sizes;
   className?: string;
+  /** Load the crest immediately instead of lazily — use inside off-screen
+   *  carousels/marquees where lazy-loading never triggers. */
+  eager?: boolean;
 }) {
   // Real crest from the live API (Football-Data) when available; otherwise the
   // brand-colour initials badge so nothing ever renders broken.
@@ -32,7 +36,7 @@ export function TeamBadge({
         <img
           src={team.badgeUrl}
           alt={`${team.name} crest`}
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           decoding="async"
           className="h-full w-full object-contain"
         />

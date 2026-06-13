@@ -33,7 +33,7 @@ export function LogoMarquee() {
               key={i}
               className="flex shrink-0 items-center gap-3 opacity-80 transition-opacity hover:opacity-100"
             >
-              <TeamBadge team={t} size="md" />
+              <TeamBadge team={t} size="md" eager />
               <span className="whitespace-nowrap font-display text-lg font-bold text-ink">
                 {t.name}
               </span>

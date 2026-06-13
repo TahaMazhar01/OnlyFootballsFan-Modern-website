@@ -32,17 +32,17 @@ export const teams: Record<string, Team> = {
   int: { id: "int", name: "Inter Milan", shortName: "INT", badgeUrl: "", primaryColor: "#0068A8" },
   juv: { id: "juv", name: "Juventus", shortName: "JUV", badgeUrl: "", primaryColor: "#111111" },
   // ── FIFA / National teams ─────────────────────────────────────────
-  arg: { id: "arg", name: "Argentina", shortName: "ARG", badgeUrl: "", primaryColor: "#75AADB" },
-  bra: { id: "bra", name: "Brazil", shortName: "BRA", badgeUrl: "", primaryColor: "#F7E92B" },
-  fra: { id: "fra", name: "France", shortName: "FRA", badgeUrl: "", primaryColor: "#002395" },
-  ger: { id: "ger", name: "Germany", shortName: "GER", badgeUrl: "", primaryColor: "#000000" },
-  esp: { id: "esp", name: "Spain", shortName: "ESP", badgeUrl: "", primaryColor: "#C60B1E" },
-  eng: { id: "eng", name: "England", shortName: "ENG", badgeUrl: "", primaryColor: "#CF081F" },
-  por: { id: "por", name: "Portugal", shortName: "POR", badgeUrl: "", primaryColor: "#006600" },
-  ned: { id: "ned", name: "Netherlands", shortName: "NED", badgeUrl: "", primaryColor: "#FF6600" },
-  ita: { id: "ita", name: "Italy", shortName: "ITA", badgeUrl: "", primaryColor: "#008C45" },
-  uru: { id: "uru", name: "Uruguay", shortName: "URU", badgeUrl: "", primaryColor: "#0038A8" },
-  bel: { id: "bel", name: "Belgium", shortName: "BEL", badgeUrl: "", primaryColor: "#E20E0E" },
+  arg: { id: "arg", name: "Argentina", shortName: "ARG", badgeUrl: "https://flagcdn.com/w160/ar.png", primaryColor: "#75AADB" },
+  bra: { id: "bra", name: "Brazil", shortName: "BRA", badgeUrl: "https://flagcdn.com/w160/br.png", primaryColor: "#F7E92B" },
+  fra: { id: "fra", name: "France", shortName: "FRA", badgeUrl: "https://flagcdn.com/w160/fr.png", primaryColor: "#002395" },
+  ger: { id: "ger", name: "Germany", shortName: "GER", badgeUrl: "https://flagcdn.com/w160/de.png", primaryColor: "#000000" },
+  esp: { id: "esp", name: "Spain", shortName: "ESP", badgeUrl: "https://flagcdn.com/w160/es.png", primaryColor: "#C60B1E" },
+  eng: { id: "eng", name: "England", shortName: "ENG", badgeUrl: "https://flagcdn.com/w160/gb-eng.png", primaryColor: "#CF081F" },
+  por: { id: "por", name: "Portugal", shortName: "POR", badgeUrl: "https://flagcdn.com/w160/pt.png", primaryColor: "#006600" },
+  ned: { id: "ned", name: "Netherlands", shortName: "NED", badgeUrl: "https://flagcdn.com/w160/nl.png", primaryColor: "#FF6600" },
+  ita: { id: "ita", name: "Italy", shortName: "ITA", badgeUrl: "https://flagcdn.com/w160/it.png", primaryColor: "#008C45" },
+  uru: { id: "uru", name: "Uruguay", shortName: "URU", badgeUrl: "https://flagcdn.com/w160/uy.png", primaryColor: "#0038A8" },
+  bel: { id: "bel", name: "Belgium", shortName: "BEL", badgeUrl: "https://flagcdn.com/w160/be.png", primaryColor: "#E20E0E" },
 };
 
 // Build kickoff times relative to "now" so Live / Upcoming / Finished stay realistic.
