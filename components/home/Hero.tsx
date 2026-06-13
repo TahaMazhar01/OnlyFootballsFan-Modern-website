@@ -30,7 +30,7 @@ export function Hero() {
         <div className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-accent/8 blur-[100px]" />
       </div>
 
-      <div className="container-page relative z-10 grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+      <div className="container-page relative z-10 grid grid-cols-1 items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         {/* ── Left: Hero copy ── */}
         <div className="text-center lg:text-left">
           {/* Live indicator badge */}
@@ -78,7 +78,7 @@ export function Hero() {
           {/* Stats row */}
           <motion.div
             {...up(4)}
-            className="mt-12 flex justify-center gap-8 lg:justify-start"
+            className="mt-12 flex flex-wrap justify-center gap-3 sm:gap-8 lg:justify-start"
           >
             {stats.map(([num, label, icon]) => (
               <div key={label} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">

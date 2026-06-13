@@ -41,12 +41,13 @@ export function Navbar() {
           href="/"
           className="group flex items-center rounded-full border border-line bg-white/95 px-3 py-1.5 shadow-soft transition-transform hover:-translate-y-0.5"
         >
-          <Logo height={32} />
+          <Logo height={28} />
         </Link>
       </div>
 
-      {/* Tubelight pill nav — bottom-center on mobile, top-center on desktop */}
-      <div className="fixed bottom-0 left-1/2 z-50 mb-6 -translate-x-1/2 sm:bottom-auto sm:top-5 sm:mb-0">
+      {/* Tubelight pill nav — bottom tab-bar until there's room for it up top
+          (lg), so it never collides with the wide brand logo on phones/tablets. */}
+      <div className="fixed bottom-0 left-1/2 z-50 mb-6 -translate-x-1/2 lg:bottom-auto lg:top-5 lg:mb-0">
         <div className="flex items-center gap-1 rounded-full border border-line bg-white/95 px-1.5 py-1.5 shadow-lift">
           {items.map((item) => {
             const Icon = item.icon;

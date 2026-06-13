@@ -36,10 +36,10 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           {/* top padding clears the fixed nav so content never sits under it */}
-          <main className="pt-20 sm:pt-28">{children}</main>
+          <main className="pt-20 lg:pt-28">{children}</main>
           <Footer />
-          {/* spacer so the mobile bottom pill never overlaps the footer */}
-          <div aria-hidden className="h-24 sm:hidden" />
+          {/* spacer so the bottom pill (mobile/tablet) never overlaps the footer */}
+          <div aria-hidden className="h-24 lg:hidden" />
         </Providers>
       </body>
     </html>
