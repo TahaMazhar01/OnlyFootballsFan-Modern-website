@@ -61,6 +61,12 @@ function toTeam(t: FdTeam): Team {
   };
 }
 
+// Last successful upstream payload, kept in module memory (survives across
+// requests on a warm serverless instance). When a 30s revalidation hits a
+// transient upstream error (rate-limit / timeout), we serve this instead of an
+// empty list — so the UI never flips back to demo data once real data loaded.
+let lastGood: { matches: Match[]; ts: number } | null = null;
+
 function toMatch(m: FdMatch): Match {
   const status = mapStatus(m.status);
   const ft = m.score?.fullTime;
@@ -96,12 +102,29 @@ export async function GET() {
       next: { revalidate: 30 },
     });
     if (!res.ok) {
+      // Transient upstream error (e.g. 429 rate-limit). Serve the last known
+      // good data so the UI stays on real scores instead of dropping to demo.
+      if (lastGood) {
+        return NextResponse.json({ live: true, matches: lastGood.matches, stale: true });
+      }
       return NextResponse.json({ live: false, matches: [], error: res.status });
     }
     const data = (await res.json()) as { matches?: FdMatch[] };
     const matches = (data.matches ?? []).map(toMatch);
-    return NextResponse.json({ live: matches.length > 0, matches });
+    if (matches.length > 0) {
+      lastGood = { matches, ts: Date.now() };
+      return NextResponse.json({ live: true, matches });
+    }
+    // Empty payload — prefer last good over nothing.
+    if (lastGood) {
+      return NextResponse.json({ live: true, matches: lastGood.matches, stale: true });
+    }
+    return NextResponse.json({ live: false, matches: [] });
   } catch {
+    // Network failure — keep serving real data if we ever had it.
+    if (lastGood) {
+      return NextResponse.json({ live: true, matches: lastGood.matches, stale: true });
+    }
     return NextResponse.json({ live: false, matches: [] });
   }
 }

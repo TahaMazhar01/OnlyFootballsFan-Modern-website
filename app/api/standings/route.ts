@@ -56,6 +56,10 @@ function toTeam(t: FdTeam): Team {
 const prettyGroup = (g?: string) =>
   g ? g.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Group";
 
+// Last successful standings, kept in module memory so a transient upstream
+// error doesn't flip the UI back to demo groups.
+let lastGood: { groups: GroupTable[]; ts: number } | null = null;
+
 export async function GET() {
   const token = process.env.FOOTBALL_DATA_TOKEN;
   if (!token) return NextResponse.json({ live: false, groups: [] });
@@ -66,6 +70,9 @@ export async function GET() {
       next: { revalidate: 300 },
     });
     if (!res.ok) {
+      if (lastGood) {
+        return NextResponse.json({ live: true, groups: lastGood.groups, stale: true });
+      }
       return NextResponse.json({ live: false, groups: [], error: res.status });
     }
     const data = (await res.json()) as { standings?: FdStanding[] };
@@ -86,8 +93,18 @@ export async function GET() {
           }),
         ),
       }));
-    return NextResponse.json({ live: groups.length > 0, groups });
+    if (groups.length > 0) {
+      lastGood = { groups, ts: Date.now() };
+      return NextResponse.json({ live: true, groups });
+    }
+    if (lastGood) {
+      return NextResponse.json({ live: true, groups: lastGood.groups, stale: true });
+    }
+    return NextResponse.json({ live: false, groups: [] });
   } catch {
+    if (lastGood) {
+      return NextResponse.json({ live: true, groups: lastGood.groups, stale: true });
+    }
     return NextResponse.json({ live: false, groups: [] });
   }
 }

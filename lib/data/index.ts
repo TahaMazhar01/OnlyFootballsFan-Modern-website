@@ -58,6 +58,11 @@ export async function getMatch(id: string): Promise<Match | undefined> {
  * the local mock fixtures so the site always renders. The `live` flag lets the
  * UI show whether it's showing real or demo data.
  */
+// Last real fixtures seen this session. Guards against a single bad/empty
+// proxy response (cold serverless lambda, momentary blip) flipping the live UI
+// back to demo data mid-session, between refreshes.
+let lastRealScores: Match[] | null = null;
+
 export async function getScores(
   status?: MatchStatus,
 ): Promise<{ matches: Match[]; live: boolean }> {
@@ -67,15 +72,20 @@ export async function getScores(
       if (res.ok) {
         const data = (await res.json()) as { live?: boolean; matches?: Match[] };
         if (data.live && Array.isArray(data.matches) && data.matches.length) {
-          const all = [...data.matches].sort(byKickoff);
-          return {
-            matches: status ? all.filter((m) => m.status === status) : all,
-            live: true,
-          };
+          lastRealScores = [...data.matches].sort(byKickoff);
         }
       }
     } catch {
-      /* network/API error — fall back to mock below */
+      /* network/API error — fall back to last-real or mock below */
+    }
+    // Once we've shown real data, never downgrade to demo within the session.
+    if (lastRealScores) {
+      return {
+        matches: status
+          ? lastRealScores.filter((m) => m.status === status)
+          : lastRealScores,
+        live: true,
+      };
     }
   }
   return { matches: await getMatches(status), live: false };

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Play, Radio, Trophy, TrendingUp } from "lucide-react";
+import { Play, Radio } from "lucide-react";
 import { PlayerCarousel } from "@/components/home/PlayerCarousel";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -11,12 +11,6 @@ const up = (i: number) => ({
   animate: { opacity: 1, y: 0 },
   transition: { delay: 0.08 * i, duration: 0.6, ease },
 });
-
-const stats: [string, string, React.ReactNode][] = [
-  ["2.4M+", "Votes Cast", <TrendingUp key="v" className="h-4 w-4 text-accent" />],
-  ["350+", "Matches Covered", <Trophy key="m" className="h-4 w-4 text-accent" />],
-  ["24/7", "Football News", <Radio key="n" className="h-4 w-4 text-accent" />],
-];
 
 export function Hero() {
   return (
@@ -73,28 +67,6 @@ export function Hero() {
             <Link href="/matches" className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-3.5 font-display text-lg font-bold text-white backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-white/10">
               <Radio className="h-5 w-5" /> Live Scores
             </Link>
-          </motion.div>
-
-          {/* Stats row */}
-          <motion.div
-            {...up(4)}
-            className="mt-12 flex flex-wrap justify-center gap-3 sm:gap-8 lg:justify-start"
-          >
-            {stats.map(([num, label, icon]) => (
-              <div key={label} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
-                  {icon}
-                </div>
-                <div>
-                  <p className="font-display text-2xl font-extrabold text-white">
-                    {num}
-                  </p>
-                  <p className="text-[10px] font-bold uppercase tracking-[2px] text-white/50">
-                    {label}
-                  </p>
-                </div>
-              </div>
-            ))}
           </motion.div>
         </div>
 
