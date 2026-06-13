@@ -1,22 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Flame } from "lucide-react";
 
 /**
- * Brand logo. Drop your transparent PNG at /public/logo.png and it shows
- * everywhere. Until then (or if it fails to load) it falls back to the
- * flame + wordmark mark — so the header never shows a broken image.
+ * Brand logo. Uses /public/logo.png; falls back to the flame + wordmark mark if
+ * it's missing, so the header never shows a broken image.
  */
 export function Logo({ height = 36 }: { height?: number }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // If the image was already cached (loaded before hydration), the onLoad event
+  // never fires — detect that here so it still shows.
+  useEffect(() => {
+    const el = imgRef.current;
+    if (el && el.complete) {
+      if (el.naturalWidth > 0) setLoaded(true);
+      else setFailed(true);
+    }
+  }, []);
 
   return (
     <span className="flex items-center">
       {!failed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
+          ref={imgRef}
           src="/logo.png"
           alt="OnlyFootballsFan"
           onLoad={() => setLoaded(true)}
